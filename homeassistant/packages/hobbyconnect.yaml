@@ -503,7 +503,6 @@ mqtt:
   # Werte 0-100 = Helligkeit in Prozent
   # Erkenntnisquelle: Community-Analyse rawsludge/esphome PR #13327
   # ------------------------------------------------------------------
-  sensor:
     - name: "WoWa Deckenlicht Dimmer"
       unique_id: hobbyconnect_dim_decke
       state_topic: "hobbyconnect/state/LIGHT_DECKE_DIM"
