@@ -30,9 +30,12 @@ influxdb:
   tags_attributes:
     - friendly_name
 
-# ANPASSEN: IP-Adresse des Shelly-Geräts für BLU-Geräte-Scan
+# ANPASSEN: IP-Adresse deines Shelly-Geräts für BLU-Geräte-Scan
+# Das ist ein Shelly Gen2/Gen3 Gerät das als BLE-Gateway fungiert.
+# Die IP findest du in der Shelly App oder in deinem Router (DHCP-Tabelle).
+# Falls du keinen Shelly als BLE-Gateway nutzt, diesen Block entfernen.
 rest_command:
   blug_scan:
     url: >-
-      http://192.168.0.127/rpc/Script.Eval?id=1&code=BLE.Scanner.Start(%7Bduration_ms:5000,active:true%7D)
+      http://SHELLY_IP_ADRESSE/rpc/Script.Eval?id=1&code=BLE.Scanner.Start(%7Bduration_ms:5000,active:true%7D)
     method: GET

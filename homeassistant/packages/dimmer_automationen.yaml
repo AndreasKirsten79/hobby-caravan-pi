@@ -1,0 +1,139 @@
+# Dimmer-Automationen: Licht einschalten → falls Dimmer auf 0, auf 100% setzen
+# Damit das Licht nicht "dunkel" eingeschaltet wird
+
+automation:
+  - id: dimmer_decke_100_bei_einschalten
+    alias: "Dimmer Decke: 100% wenn Licht eingeschaltet und Dimmer=0"
+    trigger:
+      - platform: state
+        entity_id: light.wowa_deckenlicht
+        to: "on"
+    condition:
+      - condition: numeric_state
+        entity_id: number.wowa_deckenlicht_helligkeit
+        below: 5
+    action:
+      - service: number.set_value
+        target:
+          entity_id: number.wowa_deckenlicht_helligkeit
+        data:
+          value: 100
+
+  - id: dimmer_wand_100_bei_einschalten
+    alias: "Dimmer Wand: 100% wenn Licht eingeschaltet und Dimmer=0"
+    trigger:
+      - platform: state
+        entity_id: light.wowa_wandlicht
+        to: "on"
+    condition:
+      - condition: numeric_state
+        entity_id: number.wowa_wandlicht_helligkeit
+        below: 5
+    action:
+      - service: number.set_value
+        target:
+          entity_id: number.wowa_wandlicht_helligkeit
+        data:
+          value: 100
+
+  - id: dimmer_kueche_100_bei_einschalten
+    alias: "Dimmer Küche: 100% wenn Licht eingeschaltet und Dimmer=0"
+    trigger:
+      - platform: state
+        entity_id: light.wowa_kuchenlicht
+        to: "on"
+    condition:
+      - condition: numeric_state
+        entity_id: number.wowa_kuchenlicht_helligkeit
+        below: 5
+    action:
+      - service: number.set_value
+        target:
+          entity_id: number.wowa_kuchenlicht_helligkeit
+        data:
+          value: 100
+
+  - id: dimmer_bettl_100_bei_einschalten
+    alias: "Dimmer Bett Links: 100% wenn Licht eingeschaltet und Dimmer=0"
+    trigger:
+      - platform: state
+        entity_id: light.wowa_bettlicht_links
+        to: "on"
+    condition:
+      - condition: numeric_state
+        entity_id: number.wowa_bettlicht_links_helligkeit
+        below: 5
+    action:
+      - service: number.set_value
+        target:
+          entity_id: number.wowa_bettlicht_links_helligkeit
+        data:
+          value: 100
+
+  - id: dimmer_bettr_100_bei_einschalten
+    alias: "Dimmer Bett Rechts: 100% wenn Licht eingeschaltet und Dimmer=0"
+    trigger:
+      - platform: state
+        entity_id: light.wowa_bettlicht_rechts
+        to: "on"
+    condition:
+      - condition: numeric_state
+        entity_id: number.wowa_bettlicht_rechts_helligkeit
+        below: 5
+    action:
+      - service: number.set_value
+        target:
+          entity_id: number.wowa_bettlicht_rechts_helligkeit
+        data:
+          value: 100
+
+  - id: dimmer_amb1_100_bei_einschalten
+    alias: "Dimmer Ambient 1: 100% wenn Licht eingeschaltet und Dimmer=0"
+    trigger:
+      - platform: state
+        entity_id: light.wowa_ambientelicht_1
+        to: "on"
+    condition:
+      - condition: numeric_state
+        entity_id: number.ambientelicht_1_helligkeit
+        below: 5
+    action:
+      - service: number.set_value
+        target:
+          entity_id: number.ambientelicht_1_helligkeit
+        data:
+          value: 100
+
+  - id: dimmer_amb2_100_bei_einschalten
+    alias: "Dimmer Ambient 2: 100% wenn Licht eingeschaltet und Dimmer=0"
+    trigger:
+      - platform: state
+        entity_id: light.wowa_ambientelicht_2
+        to: "on"
+    condition:
+      - condition: numeric_state
+        entity_id: number.ambientelicht_2_helligkeit
+        below: 5
+    action:
+      - service: number.set_value
+        target:
+          entity_id: number.ambientelicht_2_helligkeit
+        data:
+          value: 100
+
+  - id: dimmer_amb3_100_bei_einschalten
+    alias: "Dimmer Ambient 3: 100% wenn Licht eingeschaltet und Dimmer=0"
+    trigger:
+      - platform: state
+        entity_id: light.wowa_ambientelicht_3
+        to: "on"
+    condition:
+      - condition: numeric_state
+        entity_id: number.ambientelicht_3_helligkeit
+        below: 5
+    action:
+      - service: number.set_value
+        target:
+          entity_id: number.ambientelicht_3_helligkeit
+        data:
+          value: 100

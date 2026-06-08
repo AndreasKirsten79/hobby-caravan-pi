@@ -1,8 +1,22 @@
 # ============================================================
 # STANDORT & ZONE DYNAMISCH
-# ANPASSEN: device_tracker.DEIN_GERAET → dein HA Geräte-Tracker
-#           sensor.DEIN_GERAET_geocoded_location → dein Geocoding-Sensor
-#           "Zuhause (Elxleben)" → dein Heimatort
+#
+# ANPASSEN – 3 Stellen:
+#
+# 1. device_tracker.DEIN_GERAET
+#    → Der Entity-ID deines Smartphones in HA.
+#    Zu finden unter: Einstellungen → Geräte & Dienste → Companion App
+#    → dein Gerät → Entity "Geräteverfolgung"
+#    Beispiele: device_tracker.pixel_8, device_tracker.samsung_s24
+#
+# 2. sensor.DEIN_GERAET_geocoded_location
+#    → Der Geocoding-Sensor deines Smartphones (Adresse als Text).
+#    Wird automatisch von der HA Companion App erstellt.
+#    Name-Schema: sensor.GERAETENAME_geocoded_location
+#
+# 3. "Zuhause (Dein Ort)"
+#    → Der angezeigte Text wenn du zuhause bist.
+#    Ersetze durch deinen Heimatort, z.B. "Zuhause (München)"
 # ============================================================
 
 template:
@@ -32,7 +46,7 @@ template:
         icon: mdi:map-marker-radius
         state: >
           {% if is_state('device_tracker.DEIN_GERAET', 'home') %}
-            Zuhause (Elxleben)
+            Zuhause (DEIN_HEIMATORT)
           {% else %}
             Unterwegs
           {% endif %}
