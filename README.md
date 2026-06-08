@@ -78,7 +78,7 @@ sudo bluetoothctl
 
 MAC-Adresse in `hobbyconnect/ble_bridge.py` eintragen:
 ```python
-BLE_MAC = "DE:00:05:10:60:23"  # ← deine MAC hier
+BLE_MAC = "XX:XX:XX:XX:XX:XX"  # ← deine MAC hier (siehe Schritt 3)
 ```
 
 ### 4. Install-Script ausführen
@@ -91,10 +91,53 @@ chmod +x install.sh
 ### 5. Home Assistant einrichten
 
 Nach dem ersten Start von HA unter `http://PI-IP:8123`:
-1. HA-Konto anlegen
-2. MQTT-Integration hinzufügen (Host: `localhost`, Port: `1883`)
-3. **HACS** installieren (für BLE/BTHome Sensoren)
-4. In `automations.yaml` die Geräte-IDs (device_id/entity_id) durch deine eigenen ersetzen
+
+**a) HA-Konto anlegen**
+Beim ersten Aufruf führt HA durch die Ersteinrichtung. Standort und Zeitzone setzen — das wird für Wetterautomatisierungen benötigt.
+
+**b) MQTT-Integration einrichten** ← Pflicht, sonst keine HobbyConnect-Daten
+```
+Einstellungen → Geräte & Dienste → Integration hinzufügen → MQTT
+Host: localhost
+Port: 1883
+→ Speichern
+```
+Danach erscheinen alle HobbyConnect-Entitäten (Lichter, Sensoren, Schalter) automatisch.
+
+**c) HA Companion App installieren** ← Pflicht für Push-Benachrichtigungen
+Die Batterie-, Wetter- und Markise-Alarme nutzen `notify.mobile_app_...` — das funktioniert nur über die offizielle HA App:
+- [iOS: Home Assistant im App Store](https://apps.apple.com/app/home-assistant/id1099568401)
+- [Android: Home Assistant im Play Store](https://play.google.com/store/apps/details?id=io.homeassistant.companion.android)
+
+Nach der Installation: App öffnen → mit deiner HA-Instanz verbinden → der Notify-Service wird automatisch angelegt. Den genauen Namen findest du unter:
+```
+Einstellungen → Geräte & Dienste → Companion App → dein Gerät → Entitäten
+→ suche nach "notify" → das ist dein Service-Name
+```
+Diesen Namen dann in `packages/batterie_alarm.yaml` und `packages/wetter_alarm.yaml` eintragen.
+
+**d) BTHome-Sensoren einrichten** (Bewegungsmelder, Türkontakte, Lux-Sensoren)
+BTHome ist seit HA 2022.9 eingebaut — kein Plugin nötig. Die Sensoren werden automatisch per Bluetooth entdeckt sobald sie in Reichweite sind:
+```
+Einstellungen → Geräte & Dienste → BTHome → Geräte bestätigen
+```
+Die entity_ids der erkannten Sensoren dann in `homeassistant/automations.yaml` eintragen (ersetze die `bthome_sensor_XXXX_...` Platzhalter).
+
+**e) HACS installieren** (optional, empfohlen)
+HACS ist ein Community-Store für zusätzliche HA-Integrationen. Wird für dieses Projekt nicht zwingend benötigt, aber sinnvoll für zukünftige Erweiterungen:
+```
+https://hacs.xyz/docs/use/download/download/
+```
+
+**f) Automationen mit eigenen Geräte-IDs verknüpfen**
+Die `automations.yaml` enthält Platzhalter (`DEINE_DEVICE_ID`, `DEINE_ENTITY_ID`). Am einfachsten über die HA UI neu anlegen:
+```
+Einstellungen → Automatisierungen → Automatisierung erstellen
+```
+Oder die IDs direkt aus dem HA Developer-Tool kopieren:
+```
+Entwicklerwerkzeuge → Zustände → Gerät suchen → Entity-ID kopieren
+```
 
 ---
 
