@@ -224,6 +224,8 @@ Dieses Projekt lebt von der Community! Beiträge sind ausdrücklich erwünscht �
 
 ## Verwandte Projekte
 
+- [esphome/esphome #13327 – fendt_caravan](https://github.com/esphome/esphome/pull/13327) — Native ESPHome-Komponente für Fendt & Hobby Wohnwagen von [@rawsludge](https://github.com/rawsludge). Verbindet einen ESP32 direkt per BLE mit der Wohnwagen-Steuerung — vollständig lokal, kein Cloud-Zwang. Unterstützt Beleuchtung (inkl. Dimmer), Kühlschrank, Alde-Heizung und Temperaturen. ⚠️ PR noch offen/experimentell (Stand Juni 2026).
+
 Weitere Wohnwagen-Integrationen folgen — bei Interesse gerne ein Issue eröffnen.
 
 ---
