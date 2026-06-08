@@ -224,7 +224,7 @@ Dieses Projekt lebt von der Community! Beiträge sind ausdrücklich erwünscht �
 
 ## Verwandte Projekte
 
-- [esp32-fendt-caravan-code](https://github.com/DEIN-USER/esp32-fendt-caravan-code) – ESP32 Integration für Fendt Wohnwagen
+Weitere Wohnwagen-Integrationen folgen — bei Interesse gerne ein Issue eröffnen.
 
 ---
 
