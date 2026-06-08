@@ -1,0 +1,12 @@
+# Secrets – niemals ins Git!
+.env
+homeassistant/secrets.yaml
+homeassistant/home-assistant_v2.db*
+homeassistant/.storage/
+homeassistant/.cloud/
+homeassistant/.cache/
+homeassistant/backups/
+homeassistant/deps/
+homeassistant/tts/
+homeassistant/*.log
+homeassistant/*.log.*

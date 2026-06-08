@@ -1,0 +1,133 @@
+# ============================================================
+# LANDSTROM ABRECHNUNG
+# Quelle: sensor.DEIN_SHELLY_ENERGIE_SENSOR
+# → Shelly-Gerät das am Landstromkabel hängt (Energiemessung)
+# ANPASSEN: entity_id falls dein Shelly anders heißt
+# ============================================================
+
+utility_meter:
+  landstrom_session:
+    name: "Landstrom Session"
+    source: sensor.DEIN_SHELLY_ENERGIE_SENSOR
+    unique_id: landstrom_session
+
+  landstrom_heute:
+    name: "Landstrom Heute"
+    source: sensor.DEIN_SHELLY_ENERGIE_SENSOR
+    cycle: daily
+    unique_id: landstrom_heute
+
+  landstrom_woche:
+    name: "Landstrom Woche"
+    source: sensor.DEIN_SHELLY_ENERGIE_SENSOR
+    cycle: weekly
+    unique_id: landstrom_woche
+
+  landstrom_monat:
+    name: "Landstrom Monat"
+    source: sensor.DEIN_SHELLY_ENERGIE_SENSOR
+    cycle: monthly
+    unique_id: landstrom_monat
+
+input_number:
+  landstrom_startwert:
+    name: "Zählerstand bei Ankunft (kWh)"
+    icon: mdi:counter
+    min: 0
+    max: 999999
+    step: 0.001
+    mode: box
+    unit_of_measurement: "kWh"
+
+  landstrom_preis_kwh:
+    name: "Strompreis pro kWh"
+    icon: mdi:currency-eur
+    min: 0.01
+    max: 2.00
+    step: 0.01
+    mode: box
+    unit_of_measurement: "EUR/kWh"
+
+  landstrom_freikwh_tag:
+    name: "Freie kWh pro Tag"
+    icon: mdi:lightning-bolt-circle
+    min: 0
+    max: 50
+    step: 0.1
+    mode: box
+    unit_of_measurement: "kWh"
+
+template:
+  - sensor:
+      - name: "Landstrom Kosten Session"
+        unique_id: landstrom_kosten_session
+        unit_of_measurement: "EUR"
+        icon: mdi:currency-eur
+        state: >
+          {% set v = states('sensor.landstrom_session') | float(0) %}
+          {% set frei = states('input_number.landstrom_freikwh_tag') | float(0) %}
+          {% set preis = states('input_number.landstrom_preis_kwh') | float(0) %}
+          {{ ([v - frei, 0] | max * preis) | round(2) }}
+
+      - name: "Landstrom Kosten Heute"
+        unique_id: landstrom_kosten_heute
+        unit_of_measurement: "EUR"
+        icon: mdi:currency-eur
+        state: >
+          {% set v = states('sensor.landstrom_heute') | float(0) %}
+          {% set frei = states('input_number.landstrom_freikwh_tag') | float(0) %}
+          {% set preis = states('input_number.landstrom_preis_kwh') | float(0) %}
+          {{ ([v - frei, 0] | max * preis) | round(2) }}
+
+      - name: "Landstrom Kosten Woche"
+        unique_id: landstrom_kosten_woche
+        unit_of_measurement: "EUR"
+        icon: mdi:currency-eur
+        state: >
+          {% set v = states('sensor.landstrom_woche') | float(0) %}
+          {% set tage = 7 %}
+          {% set frei = states('input_number.landstrom_freikwh_tag') | float(0) * tage %}
+          {% set preis = states('input_number.landstrom_preis_kwh') | float(0) %}
+          {{ ([v - frei, 0] | max * preis) | round(2) }}
+
+      - name: "Landstrom Kosten Monat"
+        unique_id: landstrom_kosten_monat
+        unit_of_measurement: "EUR"
+        icon: mdi:currency-eur
+        state: >
+          {% set v = states('sensor.landstrom_monat') | float(0) %}
+          {% set tage = now().day %}
+          {% set frei = states('input_number.landstrom_freikwh_tag') | float(0) * tage %}
+          {% set preis = states('input_number.landstrom_preis_kwh') | float(0) %}
+          {{ ([v - frei, 0] | max * preis) | round(2) }}
+
+      - name: "Landstrom Verbrauch Stellplatz"
+        unique_id: landstrom_verbrauch_stellplatz
+        unit_of_measurement: "kWh"
+        icon: mdi:transmission-tower
+        state: >
+          {% set aktuell = states('sensor.DEIN_SHELLY_ENERGIE_SENSOR') | float(0) %}
+          {% set start = states('input_number.landstrom_startwert') | float(0) %}
+          {{ [aktuell - start, 0] | max | round(3) }}
+
+      - name: "Landstrom Kosten Stellplatz"
+        unique_id: landstrom_kosten_stellplatz
+        unit_of_measurement: "EUR"
+        icon: mdi:currency-eur
+        state: >
+          {% set v = states('sensor.landstrom_verbrauch_stellplatz') | float(0) %}
+          {% set frei = states('input_number.landstrom_freikwh_tag') | float(0) %}
+          {% set preis = states('input_number.landstrom_preis_kwh') | float(0) %}
+          {{ ([v - frei, 0] | max * preis) | round(2) }}
+
+      - name: "Landstrom Alltime kWh"
+        unique_id: landstrom_alltime_kwh
+        unit_of_measurement: "kWh"
+        icon: mdi:counter
+        state: >
+          {{ states('sensor.DEIN_SHELLY_ENERGIE_SENSOR') | float(0) | round(3) }}
+
+input_button:
+  landstrom_startwert_setzen:
+    name: "Zählerstand jetzt als Startwert"
+    icon: mdi:map-marker-plus

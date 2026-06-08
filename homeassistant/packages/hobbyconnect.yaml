@@ -1,0 +1,555 @@
+mqtt:
+  sensor:
+    - name: "WoWa Innentemperatur"
+      unique_id: hobbyconnect_temp_in
+      state_topic: "hobbyconnect/state/TEMP_IN"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      value_template: "{{ value | replace('°C','') | replace(',','.') | float | round(1) }}"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "WoWa Außentemperatur"
+      unique_id: hobbyconnect_temp_out
+      state_topic: "hobbyconnect/state/TEMP_OUT"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      value_template: "{{ value | replace('°C','') | replace(',','.') | float | round(1) }}"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "WoWa Batterie Spannung"
+      unique_id: hobbyconnect_ubat
+      state_topic: "hobbyconnect/state/IBS0_UBAT"
+      unit_of_measurement: "V"
+      device_class: voltage
+      value_template: "{{ value | replace(' V','') | replace(',','.') | float(0) | round(2) }}"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "WoWa Batterie Strom"
+      unique_id: hobbyconnect_ibat
+      state_topic: "hobbyconnect/state/IBS0_IBAT"
+      unit_of_measurement: "A"
+      device_class: current
+      value_template: "{{ value | replace(' A','') | replace(',','.') | float(0) | round(2) }}"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "WoWa Batterie Ladezustand"
+      unique_id: hobbyconnect_soc
+      state_topic: "hobbyconnect/state/IBS0_SOC2"
+      unit_of_measurement: "%"
+      device_class: battery
+      value_template: "{{ value | replace('%','') | trim | float | round(0) | int }}"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "WoWa Batterie Restlaufzeit"
+      unique_id: hobbyconnect_remaining
+      state_topic: "hobbyconnect/state/IBS0_REMAINING_TIME"
+      unit_of_measurement: "h"
+      value_template: "{{ value | replace(' h','') | replace(',','.') | float(0) | round(1) }}"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:battery-clock
+
+    - name: "WoWa Landstrom"
+      unique_id: hobbyconnect_line_en
+      state_topic: "hobbyconnect/state/LINE_EN"
+      value_template: "{{ 'An' if value | int == 1 else 'Aus' }}"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:power-plug
+
+    - name: "WoWa Heizung Standby"
+      unique_id: hobbyconnect_hs_en
+      state_topic: "hobbyconnect/state/HS_EN"
+      value_template: "{{ 'An' if value | int == 1 else 'Aus' }}"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:radiator
+
+    - name: "WoWa AC Freigabe"
+      unique_id: hobbyconnect_ac_en
+      state_topic: "hobbyconnect/state/AC_EN"
+      value_template: "{{ 'An' if value | int == 1 else 'Aus' }}"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "WoWa Wasserstand"
+      unique_id: hobbyconnect_water_level
+      state_topic: "hobbyconnect/state/WATER_LEVEL"
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:water
+      value_template: >-
+        {% set stufen = {0: 0, 1: 25, 2: 50, 3: 75, 4: 100} %}
+        {{ stufen[value | int] | default(0) }}
+
+    - name: "Dometic Zieltemperatur"
+      unique_id: hobbyconnect_ac_fj_target
+      state_topic: "hobbyconnect/state/AC_DOM_FJ_TARGETTEMP"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "Truma AC Status"
+      unique_id: hobbyconnect_ac_truma_enable
+      state_topic: "hobbyconnect/state/AC_TRUMA_ENABLE"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:air-conditioner
+
+    - name: "Truma AC Modus"
+      unique_id: hobbyconnect_ac_truma_mode
+      state_topic: "hobbyconnect/state/AC_TRUMA_MODE"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:air-filter
+
+    - name: "Truma AC Lüfterstufe"
+      unique_id: hobbyconnect_ac_truma_fan
+      state_topic: "hobbyconnect/state/AC_TRUMA_FAN_LEVEL"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:fan
+
+    - name: "Truma AC Temperatur"
+      unique_id: hobbyconnect_ac_truma_temp
+      state_topic: "hobbyconnect/state/AC_TRUMA_TEMP"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      value_template: "{{ value | float(0) / 10 | round(1) }}"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "Truma AC Licht Dimmer"
+      unique_id: hobbyconnect_ac_truma_light_dimmer
+      state_topic: "hobbyconnect/state/AC_TRUMA_LIGHT_DIMMER"
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "Truma AC Typ"
+      unique_id: hobbyconnect_ac_truma_type
+      state_topic: "hobbyconnect/state/AC_TRUMA_TYPE"
+      availability_topic: "hobbyconnect/availability"
+      entity_category: diagnostic
+      icon: mdi:air-conditioner
+
+    - name: "Ultraheat Status"
+      unique_id: hobbyconnect_ultraheat_onoff
+      state_topic: "hobbyconnect/state/ULTRAHEAT_ONOFF"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:heat-wave
+
+    - name: "Ultraheat Temperatur"
+      unique_id: hobbyconnect_ultraheat_temp
+      state_topic: "hobbyconnect/state/ULTRAHEAT_TEMP"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "Ultraheat Leistung"
+      unique_id: hobbyconnect_ultraheat_power
+      state_topic: "hobbyconnect/state/ULTRAHEAT_POWER"
+      unit_of_measurement: "W"
+      device_class: power
+      value_template: "{{ value | replace(' W','') | replace(',','.') | float(0) | round(0) | int }}"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "Heizung Elektro"
+      unique_id: hobbyconnect_heater_el
+      state_topic: "hobbyconnect/state/HEATER_EL"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:lightning-bolt
+
+    - name: "Heizung Wasser"
+      unique_id: hobbyconnect_heater_water
+      state_topic: "hobbyconnect/state/HEATER_WATER"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:water-boiler
+
+    - name: "Heizung Wassertemp"
+      unique_id: hobbyconnect_heater_water_temp
+      state_topic: "hobbyconnect/state/HEATER_WATER_TEMP"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:thermometer-water
+
+    - name: "Heizung Temperatur"
+      unique_id: hobbyconnect_heater_temp
+      state_topic: "hobbyconnect/state/HEATER_TEMP"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      value_template: "{{ value | replace('°C','') | replace(',','.') | float(0) | round(1) }}"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "TH Heizung Luftbetrieb"
+      unique_id: hobbyconnect_th_a_en
+      state_topic: "hobbyconnect/state/TH_A_EN"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:radiator
+
+    - name: "TH Heizung Wasserbetrieb"
+      unique_id: hobbyconnect_th_w_en
+      state_topic: "hobbyconnect/state/TH_W_EN"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:water-boiler
+
+    - name: "TH Heizung Lufttemperatur"
+      unique_id: hobbyconnect_th_a_t
+      state_topic: "hobbyconnect/state/TH_A_T"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      value_template: "{{ value | replace('°C','') | replace(',','.') | float(0) | round(1) }}"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "TH Heizung Wassertemperatur"
+      unique_id: hobbyconnect_th_w_t
+      state_topic: "hobbyconnect/state/TH_W_T"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      value_template: "{{ value | replace('°C','') | replace(',','.') | float(0) | round(1) }}"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "TH Typ"
+      unique_id: hobbyconnect_th_type
+      state_topic: "hobbyconnect/state/TH_TYPE"
+      availability_topic: "hobbyconnect/availability"
+      entity_category: diagnostic
+
+    - name: "Kuehlschrank Modus"
+      unique_id: hobbyconnect_fridge_mode
+      state_topic: "hobbyconnect/state/FRIDGE_MODE"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:fridge
+
+    - name: "Kuehlschrank Temperatur"
+      unique_id: hobbyconnect_fridge_temp
+      state_topic: "hobbyconnect/state/FRIDGE_TEMP"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "Kuehlschrank Typ"
+      unique_id: hobbyconnect_fridge_type
+      state_topic: "hobbyconnect/state/FRIDGE_TYPE"
+      availability_topic: "hobbyconnect/availability"
+      entity_category: diagnostic
+
+    - name: "WoWa Breitengrad"
+      unique_id: hobbyconnect_latitude
+      state_topic: "hobbyconnect/state/LATITUDE"
+      unit_of_measurement: "°"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:map-marker-radius
+
+    - name: "WoWa Laengengrad"
+      unique_id: hobbyconnect_longitude
+      state_topic: "hobbyconnect/state/LONGITUDE"
+      unit_of_measurement: "°"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:map-marker-radius
+
+    - name: "Panel Version"
+      unique_id: hobbyconnect_panel_version
+      state_topic: "hobbyconnect/state/PANEL_VERSION"
+      availability_topic: "hobbyconnect/availability"
+      entity_category: diagnostic
+
+    - name: "Software Version"
+      unique_id: hobbyconnect_sw_version
+      state_topic: "hobbyconnect/state/SOFTWARE_VERSION"
+      availability_topic: "hobbyconnect/availability"
+      entity_category: diagnostic
+
+    - name: "Fahrzeugtyp"
+      unique_id: hobbyconnect_vehicle_type
+      state_topic: "hobbyconnect/state/VEHICLE_TYPE"
+      availability_topic: "hobbyconnect/availability"
+      entity_category: diagnostic
+      icon: mdi:caravan
+
+    - name: "GSM Signal"
+      unique_id: hobbyconnect_gsm
+      state_topic: "hobbyconnect/state/GSM_SIGNAL"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:signal
+
+  binary_sensor:
+    - name: "HobbyConnect Bridge"
+      unique_id: hobbyconnect_bridge_avail
+      state_topic: "hobbyconnect/availability"
+      payload_on: "online"
+      payload_off: "offline"
+      device_class: connectivity
+
+    - name: "Batteriemonitor verfuegbar"
+      unique_id: hobbyconnect_ibs0_available
+      state_topic: "hobbyconnect/state/IBS0_AVAILABLE"
+      payload_on: "1"
+      payload_off: "0"
+      device_class: connectivity
+
+    - name: "Dometic verfuegbar"
+      unique_id: hobbyconnect_ac_fj_available
+      state_topic: "hobbyconnect/state/AC_DOM_FJ_AVAILABLE"
+      payload_on: "1"
+      payload_off: "0"
+      device_class: connectivity
+
+    - name: "Ultraheat verfuegbar"
+      unique_id: hobbyconnect_ultraheat_available
+      state_topic: "hobbyconnect/state/ULTRAHEAT_AVAILABLE"
+      payload_on: "1"
+      payload_off: "0"
+      device_class: connectivity
+
+    - name: "Truma AC verfuegbar"
+      unique_id: hobbyconnect_ac_truma_available
+      state_topic: "hobbyconnect/state/AC_TRUMA_AVAILABLE"
+      payload_on: "1"
+      payload_off: "0"
+      device_class: connectivity
+
+    - name: "Truma AC Licht"
+      unique_id: hobbyconnect_ac_truma_light
+      state_topic: "hobbyconnect/state/AC_TRUMA_LIGHT_ON_OFF"
+      payload_on: "1"
+      payload_off: "0"
+
+    - name: "Heizung verfuegbar"
+      unique_id: hobbyconnect_heater_available
+      state_topic: "hobbyconnect/state/HEATER_AVAILABLE"
+      payload_on: "1"
+      payload_off: "0"
+      device_class: connectivity
+
+    - name: "Heizung aktiv"
+      unique_id: hobbyconnect_heater_onoff
+      state_topic: "hobbyconnect/state/HEATER_ONOFF"
+      payload_on: "1"
+      payload_off: "0"
+      device_class: heat
+
+    - name: "WoWa Heizung Gas"
+      unique_id: hobbyconnect_heater_gas_bin
+      state_topic: "hobbyconnect/state/HEATER_GAS"
+      payload_on: "On"
+      payload_off: "Off"
+      device_class: heat
+
+    - name: "TH Heizung verfuegbar"
+      unique_id: hobbyconnect_th_available
+      state_topic: "hobbyconnect/state/TH_AVAILABLE"
+      payload_on: "1"
+      payload_off: "0"
+      device_class: connectivity
+
+    - name: "TT verfuegbar"
+      unique_id: hobbyconnect_tt_available
+      state_topic: "hobbyconnect/state/TT_AVAILABLE"
+      payload_on: "1"
+      payload_off: "0"
+      device_class: connectivity
+
+    - name: "Kuehlschrank verfuegbar"
+      unique_id: hobbyconnect_fridge_available
+      state_topic: "hobbyconnect/state/FRIDGE_AVAILABLE"
+      payload_on: "1"
+      payload_off: "0"
+      device_class: connectivity
+
+    - name: "Kuehlschrank Ein/Aus"
+      unique_id: hobbyconnect_fridge_onoff
+      state_topic: "hobbyconnect/state/FRIDGE_ON_OFF"
+      payload_on: "1"
+      payload_off: "0"
+
+    - name: "PI Pairing aktiv"
+      unique_id: hobbyconnect_pi_pairing
+      state_topic: "hobbyconnect/state/PI_PAIRING"
+      payload_on: "1"
+      payload_off: "0"
+      device_class: connectivity
+      entity_category: diagnostic
+
+  switch:
+    - name: "Dometic Klimaanlage"
+      unique_id: hobbyconnect_switch_dometic
+      state_topic: "hobbyconnect/state/AC_DOM_FJ_ENABLE"
+      command_topic: "hobbyconnect/cmd/AC_DOM_FJ_ENABLE"
+      payload_on: "1"
+      payload_off: "0"
+      state_on: "On"
+      state_off: "Off"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:air-conditioner
+
+    - name: "WoWa Fussbodenheizung"
+      unique_id: hobbyconnect_switch_fussb
+      state_topic: "hobbyconnect/state/LIGHT_FUSSB"
+      command_topic: "hobbyconnect/cmd/LIGHT_FUSSB"
+      payload_on: "1"
+      payload_off: "0"
+      state_on: "1"
+      state_off: "0"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:radiator-disabled
+
+    - name: "WoWa Warmwassertherme"
+      unique_id: hobbyconnect_switch_therme
+      state_topic: "hobbyconnect/state/LIGHT_THERME"
+      command_topic: "hobbyconnect/cmd/LIGHT_THERME"
+      payload_on: "1"
+      payload_off: "0"
+      state_on: "1"
+      state_off: "0"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:water-boiler
+
+  number:
+    - name: "Dometic Zieltemperatur setzen"
+      unique_id: hobbyconnect_number_dometic_temp
+      state_topic: "hobbyconnect/state/AC_DOM_FJ_TARGETTEMP"
+      command_topic: "hobbyconnect/cmd/AC_DOM_FJ_TARGETTEMP"
+      min: 16
+      max: 31
+      step: 1
+      unit_of_measurement: "°C"
+      device_class: temperature
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:thermometer
+
+  light:
+    - name: "WoWa Deckenlicht"
+      unique_id: hobbyconnect_light_decke
+      state_topic: "hobbyconnect/state/LIGHT_DECKE"
+      command_topic: "hobbyconnect/cmd/LIGHT_DECKE"
+      payload_on: "1"
+      payload_off: "0"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "WoWa Wandlicht"
+      unique_id: hobbyconnect_light_wand
+      state_topic: "hobbyconnect/state/LIGHT_WAND"
+      command_topic: "hobbyconnect/cmd/LIGHT_WAND"
+      payload_on: "1"
+      payload_off: "0"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "WoWa Kuechenlicht"
+      unique_id: hobbyconnect_light_kueche
+      state_topic: "hobbyconnect/state/LIGHT_KUECHE"
+      command_topic: "hobbyconnect/cmd/LIGHT_KUECHE"
+      payload_on: "1"
+      payload_off: "0"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "WoWa Aussenlicht"
+      unique_id: hobbyconnect_light_aussen
+      state_topic: "hobbyconnect/state/LIGHT_AUSSEN"
+      command_topic: "hobbyconnect/cmd/LIGHT_AUSSEN"
+      payload_on: "1"
+      payload_off: "0"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "Ambientelicht Betten"
+      unique_id: hobbyconnect_light_amb1
+      state_topic: "hobbyconnect/state/LIGHT_AMB1"
+      command_topic: "hobbyconnect/cmd/LIGHT_AMB1"
+      payload_on: "1"
+      payload_off: "0"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "Ambientelicht Sitzgruppe"
+      unique_id: hobbyconnect_light_amb2
+      state_topic: "hobbyconnect/state/LIGHT_AMB2"
+      command_topic: "hobbyconnect/cmd/LIGHT_AMB2"
+      payload_on: "1"
+      payload_off: "0"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "LED Decke Tisch"
+      unique_id: hobbyconnect_light_amb3
+      state_topic: "hobbyconnect/state/LIGHT_AMB3"
+      command_topic: "hobbyconnect/cmd/LIGHT_AMB3"
+      payload_on: "1"
+      payload_off: "0"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "WoWa Bettlicht Links"
+      unique_id: hobbyconnect_light_bettl
+      state_topic: "hobbyconnect/state/LIGHT_BETTL"
+      command_topic: "hobbyconnect/cmd/LIGHT_BETTL"
+      payload_on: "1"
+      payload_off: "0"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "WoWa Bettlicht Rechts"
+      unique_id: hobbyconnect_light_bettr
+      state_topic: "hobbyconnect/state/LIGHT_BETTR"
+      command_topic: "hobbyconnect/cmd/LIGHT_BETTR"
+      payload_on: "1"
+      payload_off: "0"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "WoWa Duschlicht"
+      unique_id: hobbyconnect_light_dusche
+      state_topic: "hobbyconnect/state/LIGHT_WASCH"
+      command_topic: "hobbyconnect/cmd/LIGHT_WASCH"
+      payload_on: "1"
+      payload_off: "0"
+      availability_topic: "hobbyconnect/availability"
+
+    - name: "WoWa Waschlicht"
+      unique_id: hobbyconnect_light_wasch
+      state_topic: "hobbyconnect/state/LIGHT_DUSCHE"
+      command_topic: "hobbyconnect/cmd/LIGHT_DUSCHE"
+      payload_on: "1"
+      payload_off: "0"
+      availability_topic: "hobbyconnect/availability"
+
+  select:
+    - name: "Dometic Modus"
+      unique_id: hobbyconnect_select_dometic_mode
+      state_topic: "hobbyconnect/state/AC_DOM_FJ_MODE"
+      command_topic: "hobbyconnect/cmd/AC_DOM_FJ_MODE"
+      options:
+        - "Fan"
+        - "Heat"
+        - "Cool"
+        - "Auto"
+        - "Dry"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:air-filter
+
+    - name: "Dometic Lüfterstufe"
+      unique_id: hobbyconnect_select_dometic_fan
+      state_topic: "hobbyconnect/state/AC_DOM_FJ_FAN_SPEED"
+      command_topic: "hobbyconnect/cmd/AC_DOM_FJ_FAN_SPEED"
+      options:
+        - "Slow"
+        - "Med"
+        - "Fast"
+        - "Max"
+        - "Auto"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:fan
+
+
+template:
+  - sensor:
+      - name: "WoWa Wasser Liter"
+        unique_id: wowa_wasser_liter
+        unit_of_measurement: "L"
+        icon: mdi:water
+        state: >
+          {{ (states('sensor.wowa_wasserstand') | float(0) * 47 / 100) | round(1) }}
+
+      - name: "WoWa Wasser Fehlend bis 75%"
+        unique_id: wowa_wasser_fehlend_75
+        unit_of_measurement: "L"
+        icon: mdi:water-plus
+        state: >
+          {% set stand = states('sensor.wowa_wasserstand') | float(0) %}
+          {% if stand < 75 %}
+            {{ ((75 - stand) * 47 / 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+
+      - name: "WoWa Wasser Prozent"
+        unique_id: wowa_wasser_prozent
+        unit_of_measurement: "%"
+        icon: mdi:gauge
+        state: >
+          {{ states('sensor.wowa_wasserstand') | float(0) | round(0) }}

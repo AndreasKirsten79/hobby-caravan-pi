@@ -1,0 +1,137 @@
+# ============================================================
+# AUTOMATIONEN
+# ANPASSEN: device_id / entity_id Werte → aus deiner HA-Instanz
+# Die IDs (z.B. 9b88abe956aab9190db2cb1f5a4347f4) sind
+# instanzspezifisch und müssen über HA UI neu verknüpft werden.
+# ============================================================
+
+- id: '1775248002765'
+  alias: Aussenlicht
+  description: Aussenlicht bei Sonnenuntergang automatisch an
+  triggers:
+  - trigger: sun
+    event: sunset
+    offset: 0
+  conditions:
+  - condition: device
+    device_id: DEINE_DEVICE_ID       # ANPASSEN in HA UI
+    domain: device_tracker
+    entity_id: DEINE_ENTITY_ID       # ANPASSEN in HA UI
+    type: is_home
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    target:
+      entity_id: light.wowa_aussenlicht
+  mode: single
+
+- id: '1775248311963'
+  alias: Focus ambiente
+  description: Ambientelicht an wenn Bewegungsmelder aus
+  triggers:
+  - type: turned_off
+    device_id: DEINE_DEVICE_ID       # ANPASSEN in HA UI
+    entity_id: DEINE_ENTITY_ID       # ANPASSEN in HA UI
+    domain: binary_sensor
+    trigger: device
+  conditions: []
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    target:
+      entity_id: light.wowa_ambientelicht_1
+  mode: single
+
+- id: '1775335689851'
+  alias: Aussenleuchte aus
+  description: Aussenlicht bei Sonnenaufgang automatisch aus
+  triggers:
+  - trigger: sun
+    event: sunrise
+    offset: 0
+  conditions: []
+  actions:
+  - action: light.turn_off
+    metadata: {}
+    target:
+      entity_id: light.wowa_aussenlicht
+  mode: single
+
+- id: '1776089023643'
+  alias: Waschlicht bei Bewegung & Dunkelheit
+  description: Licht an bei Bewegung unter 100 Lux, nur wenn anderes Innenlicht an
+  triggers:
+  - entity_id: binary_sensor.bthome_sensor_d346_bewegung  # ANPASSEN
+    trigger: state
+  conditions:
+  - condition: state
+    entity_id: light.wowa_waschlicht
+    state: 'off'
+  - condition: numeric_state
+    entity_id: sensor.bthome_sensor_d346_beleuchtungsstarke  # ANPASSEN
+    below: 100
+  - condition: template
+    value_template: "{{ states('light.wowa_ambientelicht_1') == 'on'
+      or states('light.wowa_ambientelicht_2') == 'on'
+      or states('light.wowa_ambientelicht_3') == 'on'
+      or states('light.wowa_bettlicht_links') == 'on'
+      or states('light.wowa_bettlicht_rechts') == 'on'
+      or states('light.wowa_deckenlicht') == 'on'
+      or states('light.wowa_duschlicht') == 'on'
+      or states('light.wowa_kuchenlicht') == 'on'
+      or states('light.wowa_wandlicht') == 'on' }}"
+  actions:
+  - target:
+      entity_id: light.wowa_waschlicht
+    action: light.turn_on
+  - wait_for_trigger:
+    - entity_id: binary_sensor.bthome_sensor_d346_bewegung  # ANPASSEN
+      trigger: state
+    timeout:
+      minutes: 10
+    continue_on_timeout: true
+  - target:
+      entity_id: light.wowa_waschlicht
+    action: light.turn_off
+  mode: single
+
+- id: '1776116000941'
+  alias: Aussenlicht bei Türöffnung & Dunkelheit
+  description: Aussenlicht an wenn Tür geöffnet, Lux unter 100 und Licht war aus
+  triggers:
+  - entity_id: binary_sensor.bthome_sensor_6c23_fenster  # ANPASSEN
+    to: 'on'
+    trigger: state
+  conditions:
+  - condition: state
+    entity_id: light.wowa_aussenlicht
+    state: 'off'
+  - condition: numeric_state
+    entity_id: sensor.bthome_sensor_5625_beleuchtungsstarke  # ANPASSEN
+    below: 100
+  actions:
+  - target:
+      entity_id: light.wowa_aussenlicht
+    action: light.turn_on
+  - delay:
+      minutes: 5
+  - condition: state
+    entity_id: light.wowa_aussenlicht
+    state: 'on'
+  - target:
+      entity_id: light.wowa_aussenlicht
+    action: light.turn_off
+  mode: single
+
+- alias: BLU Geräte Refresh alle 10 Minuten
+  description: Nur wenn Wohnwagen in den letzten 12h aktiv genutzt wurde
+  mode: single
+  trigger:
+    - platform: time_pattern
+      minutes: "/10"
+  condition:
+    - condition: template
+      value_template: >
+        {{ (now() - states.binary_sensor.bthome_sensor_6c23_fenster.last_changed).total_seconds() < 43200 }}
+  action:
+    - service: rest_command.blug_scan

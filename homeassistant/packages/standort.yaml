@@ -1,0 +1,38 @@
+# ============================================================
+# STANDORT & ZONE DYNAMISCH
+# ANPASSEN: device_tracker.DEIN_GERAET → dein HA Geräte-Tracker
+#           sensor.DEIN_GERAET_geocoded_location → dein Geocoding-Sensor
+#           "Zuhause (Elxleben)" → dein Heimatort
+# ============================================================
+
+template:
+  - sensor:
+      - name: "WoWa Breitengrad"
+        unique_id: wowa_latitude
+        icon: mdi:latitude
+        unit_of_measurement: "°"
+        state: >
+          {{ state_attr('device_tracker.DEIN_GERAET', 'latitude') | round(6) }}
+
+      - name: "WoWa Längengrad"
+        unique_id: wowa_longitude
+        icon: mdi:longitude
+        unit_of_measurement: "°"
+        state: >
+          {{ state_attr('device_tracker.DEIN_GERAET', 'longitude') | round(6) }}
+
+      - name: "WoWa Standort Adresse"
+        unique_id: wowa_standort_adresse
+        icon: mdi:map-marker
+        state: >
+          {{ states('sensor.DEIN_GERAET_geocoded_location') }}
+
+      - name: "WoWa Standort Zone"
+        unique_id: wowa_standort_zone
+        icon: mdi:map-marker-radius
+        state: >
+          {% if is_state('device_tracker.DEIN_GERAET', 'home') %}
+            Zuhause (Elxleben)
+          {% else %}
+            Unterwegs
+          {% endif %}

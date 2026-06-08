@@ -1,0 +1,135 @@
+networks:
+  caravan:
+    driver: bridge
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    restart: unless-stopped
+    networks:
+      - caravan
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - /opt/caravan-data/mosquitto/data:/mosquitto/data
+      - /opt/caravan-data/mosquitto/log:/mosquitto/log
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - /opt/caravan-data/homeassistant:/config
+      - /opt/caravan-data/backups/homeassistant:/config/backups
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=Europe/Berlin
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    restart: unless-stopped
+    networks:
+      - caravan
+    ports:
+      - "8086:8086"
+    volumes:
+      - /opt/caravan-data/influxdb/data:/var/lib/influxdb2
+      - /opt/caravan-data/influxdb/config:/etc/influxdb2
+    environment:
+      - TZ=Europe/Berlin
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=caravan
+      - DOCKER_INFLUXDB_INIT_BUCKET=homeassistant
+      - DOCKER_INFLUXDB_INIT_RETENTION=52w
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    depends_on:
+      - influxdb
+    networks:
+      - caravan
+    ports:
+      - "3000:3000"
+    volumes:
+      - /opt/caravan-data/grafana:/var/lib/grafana
+    environment:
+      - TZ=Europe/Berlin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: tailscale
+    restart: unless-stopped
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - /var/lib/tailscale:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      # ANPASSEN: Eindeutiger Name im Tailscale-Netz
+      - TS_HOSTNAME=caravan-pi
+
+  nextcloud-db:
+    image: mariadb:11
+    container_name: nextcloud-db
+    restart: unless-stopped
+    networks:
+      - caravan
+    volumes:
+      - /opt/caravan-data/mariadb:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud
+    restart: unless-stopped
+    depends_on:
+      - nextcloud-db
+    networks:
+      - caravan
+    ports:
+      - "8080:80"
+    volumes:
+      - /opt/caravan-data/nextcloud:/var/www/html
+      - /opt/caravan-data/media:/var/www/html/data/media
+    environment:
+      - TZ=Europe/Berlin
+      - MYSQL_HOST=nextcloud-db
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: unless-stopped
+    networks:
+      - caravan
+    ports:
+      - "3001:3001"
+    volumes:
+      - /opt/caravan-data/uptime-kuma:/app/data

@@ -1,0 +1,20 @@
+[Unit]
+Description=HobbyConnect BLE Bridge
+After=network.target bluetooth.target mosquitto.service
+Wants=bluetooth.target
+
+[Service]
+Type=simple
+# ANPASSEN: Linux-Username auf dem Raspberry Pi
+User=YOUR_PI_USER
+WorkingDirectory=/opt/hobbyconnect
+ExecStart=/opt/hobbyconnect/venv/bin/python3 /opt/hobbyconnect/ble_bridge.py
+Restart=on-failure
+RestartSec=15s
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=hobbyconnect-bridge
+Environment=TZ=Europe/Berlin
+
+[Install]
+WantedBy=multi-user.target

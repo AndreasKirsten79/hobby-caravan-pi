@@ -1,0 +1,140 @@
+# ============================================================
+# WETTER ALARME - Markise & Dachfenster
+# Normal: nur 06:00-09:00 und 17:00-20:00
+# Critical: IMMER (überschreibt auch Lautlos)
+# ANPASSEN: notify.DEIN_NOTIFY_SERVICE → dein HA Notify-Service
+# ============================================================
+
+automation:
+  - id: markise_vorwarnung
+    alias: "Markise Vorwarnung Wind 30 km/h"
+    trigger:
+      - platform: numeric_state
+        entity_id: weather.forecast_home
+        attribute: wind_speed
+        above: 30
+    condition:
+      - condition: or
+        conditions:
+          - condition: time
+            after: "06:00:00"
+            before: "09:00:00"
+          - condition: time
+            after: "17:00:00"
+            before: "20:00:00"
+      - condition: numeric_state
+        entity_id: weather.forecast_home
+        attribute: wind_speed
+        above: 30
+    action:
+      - service: notify.DEIN_NOTIFY_SERVICE  # ANPASSEN
+        data:
+          title: "⚠️ Markise - Vorwarnung"
+          message: >
+            Wind {{ state_attr('weather.forecast_home', 'wind_speed') | round(0) }} km/h.
+            Markise beobachten!
+          data:
+            push:
+              sound: default
+              interruption-level: active
+    mode: single
+
+  - id: markise_alarm
+    alias: "Markise Alarm Wind 50 km/h"
+    trigger:
+      - platform: numeric_state
+        entity_id: weather.forecast_home
+        attribute: wind_speed
+        above: 50
+    action:
+      - service: notify.DEIN_NOTIFY_SERVICE  # ANPASSEN
+        data:
+          title: "🚨 Markise SOFORT einziehen!"
+          message: >
+            Böen {{ state_attr('weather.forecast_home', 'wind_speed') | round(0) }} km/h!
+            Markise sofort einziehen!
+          data:
+            push:
+              sound: default
+              interruption-level: critical
+    mode: single
+
+  - id: dachfenster_regen_vorhersage
+    alias: "Dachfenster - Regen kommt"
+    trigger:
+      - platform: state
+        entity_id: weather.forecast_home
+        to:
+          - "rainy"
+          - "pouring"
+          - "lightning-rainy"
+          - "snowy-rainy"
+    condition:
+      - condition: or
+        conditions:
+          - condition: time
+            after: "06:00:00"
+            before: "09:00:00"
+          - condition: time
+            after: "17:00:00"
+            before: "20:00:00"
+    action:
+      - service: notify.DEIN_NOTIFY_SERVICE  # ANPASSEN
+        data:
+          title: "🌧️ Dachfenster schließen!"
+          message: >
+            Regen wird vorhergesagt ({{ states('weather.forecast_home') }}).
+            Dachfenster schließen!
+          data:
+            push:
+              sound: default
+              interruption-level: active
+    mode: single
+
+  - id: dachfenster_regen_jetzt
+    alias: "Dachfenster - Starkregen jetzt"
+    trigger:
+      - platform: state
+        entity_id: weather.forecast_home
+        to: "pouring"
+    action:
+      - service: notify.DEIN_NOTIFY_SERVICE  # ANPASSEN
+        data:
+          title: "⛈️ Starkregen jetzt!"
+          message: "Starkregen aktiv - Dachfenster und Markise prüfen!"
+          data:
+            push:
+              sound: default
+              interruption-level: critical
+    mode: single
+
+  - id: markise_vorwarnung_stunde
+    alias: "Markise Vorwarnung - stündliche Erinnerung"
+    trigger:
+      - platform: time_pattern
+        hours: "/1"
+    condition:
+      - condition: or
+        conditions:
+          - condition: time
+            after: "06:00:00"
+            before: "09:00:00"
+          - condition: time
+            after: "17:00:00"
+            before: "20:00:00"
+      - condition: numeric_state
+        entity_id: weather.forecast_home
+        attribute: wind_speed
+        above: 30
+    action:
+      - service: notify.DEIN_NOTIFY_SERVICE  # ANPASSEN
+        data:
+          title: "⚠️ Wind noch immer stark"
+          message: >
+            Wind {{ state_attr('weather.forecast_home', 'wind_speed') | round(0) }} km/h -
+            Markise weiterhin beobachten!
+          data:
+            push:
+              sound: default
+              interruption-level: active
+    mode: single

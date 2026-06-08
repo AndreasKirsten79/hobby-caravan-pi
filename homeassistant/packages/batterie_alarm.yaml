@@ -1,0 +1,69 @@
+# ============================================================
+# BATTERIE ALARM
+# ANPASSEN: notify.DEIN_NOTIFY_SERVICE → dein HA Notify-Service
+# ============================================================
+
+automation:
+  - id: batterie_warnung_25
+    alias: "Batterie Warnung 25%"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.wowa_batterie_ladezustand
+        below: 25
+    condition:
+      - condition: numeric_state
+        entity_id: sensor.wowa_batterie_ladezustand
+        below: 25
+    action:
+      - service: notify.DEIN_NOTIFY_SERVICE  # ANPASSEN
+        data:
+          title: "⚠️ Batterie schwach"
+          message: >
+            Batterieladung bei {{ states('sensor.wowa_batterie_ladezustand') | round(0) }}%.
+            Bitte Landstrom anschließen oder Laden einleiten!
+          data:
+            push:
+              sound: default
+              interruption-level: active
+    mode: single
+
+  - id: batterie_alarm_15
+    alias: "Batterie Kritisch 15%"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.wowa_batterie_ladezustand
+        below: 15
+    action:
+      - service: notify.DEIN_NOTIFY_SERVICE  # ANPASSEN
+        data:
+          title: "🚨 Batterie KRITISCH!"
+          message: >
+            Batterieladung nur noch {{ states('sensor.wowa_batterie_ladezustand') | round(0) }}%!
+            Sofort Landstrom anschließen!
+          data:
+            push:
+              sound: default
+              interruption-level: critical
+    mode: single
+
+  - id: batterie_alarm_15_wiederholung
+    alias: "Batterie Kritisch - Wiederholung alle 30 Min"
+    trigger:
+      - platform: time_pattern
+        minutes: "/30"
+    condition:
+      - condition: numeric_state
+        entity_id: sensor.wowa_batterie_ladezustand
+        below: 15
+    action:
+      - service: notify.DEIN_NOTIFY_SERVICE  # ANPASSEN
+        data:
+          title: "🚨 Batterie immer noch kritisch!"
+          message: >
+            Batterieladung {{ states('sensor.wowa_batterie_ladezustand') | round(0) }}% -
+            Sofort Landstrom anschließen!
+          data:
+            push:
+              sound: default
+              interruption-level: critical
+    mode: single
