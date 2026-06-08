@@ -196,9 +196,39 @@ docker exec -it mosquitto mosquitto_sub -h localhost -t "hobbyconnect/#" -v
 
 ---
 
+## Mitmachen & Verbesserungen
+
+Dieses Projekt lebt von der Community! Beiträge sind ausdrücklich erwünscht — egal ob Bugfix, neue Idee oder ein Feature das noch niemand entdeckt hat.
+
+**So kannst du beitragen:**
+
+- 🐛 **Bug gefunden?** → [Issue erstellen](https://github.com/AndreasKirsten79/hobby-caravan-pi/issues/new)
+- 💡 **Idee oder Verbesserung?** → [Issue erstellen](https://github.com/AndreasKirsten79/hobby-caravan-pi/issues/new) und beschreiben
+- 🔧 **Direkt mitbauen?** → Fork → Branch → Pull Request
+- 🚐 **Andere Wohnwagen-Marke?** Wenn du das System für einen anderen Hersteller angepasst hast, freuen wir uns über einen PR oder ein Verweis-Issue
+
+**Mögliche Erweiterungen (offen für PRs):**
+- Grafana-Dashboard als Export
+- Unterstützung weiterer HobbyConnect-Geräte/Topics
+- Truma-Heizungssteuerung via MQTT
+- HA Lovelace Dashboard als YAML-Export
+- Mehrsprachige README (EN)
+
+---
+
 ## Verwandte Projekte
 
 - [esp32-fendt-caravan-code](https://github.com/DEIN-USER/esp32-fendt-caravan-code) – ESP32 Integration für Fendt Wohnwagen
+
+---
+
+## KI-Hinweis
+
+Dieses Projekt wurde gemeinsam mit **Claude (Anthropic)** entwickelt — der Code, die Konfigurationen und die Dokumentation entstanden in einer kollaborativen Session zwischen Mensch und KI.
+
+Das bedeutet: Das System ist real, getestet und läuft produktiv in einem Hobby-Wohnwagen. Die KI hat dabei geholfen, den Code sauber zu strukturieren, zu dokumentieren und reproduzierbar zu machen.
+
+Verbesserungsvorschläge, ob von Menschen oder KI-assistiert, sind gleichermassen willkommen. 🤖 + 🧑 = 🚐💡
 
 ---
 
