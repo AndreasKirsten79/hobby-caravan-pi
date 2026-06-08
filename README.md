@@ -1,5 +1,11 @@
 # Hobby Caravan Pi
 
+> ⚠️ **Disclaimer:** Dieses Projekt steht in keiner Verbindung zur Hobby Wohnwagenwerk GmbH & Co. KG.
+> "HobbyConnect" ist eine eingetragene Marke von Hobby Wohnwagenwerk. Das Projekt entstand durch
+> eigenständige Analyse des Bluetooth-Protokolls für private Interoperabilitätszwecke gemäß § 69e UrhG.
+> Es handelt sich um ein inoffizielles Community-Projekt ohne kommerzielle Absicht.
+> Nutzung auf eigene Verantwortung.
+
 Raspberry Pi Setup für die Integration des **Hobby HobbyConnect**-Systems in Home Assistant.
 
 Liest alle Daten der Wohnwagen-Steuerung (Lichter, Heizung, Batterie, Klimaanlage, Wasserstand, ...) per Bluetooth BLE aus und macht sie in Home Assistant steuerbar.
@@ -229,6 +235,18 @@ Dieses Projekt wurde gemeinsam mit **Claude (Anthropic)** entwickelt — der Cod
 Das bedeutet: Das System ist real, getestet und läuft produktiv in einem Hobby-Wohnwagen. Die KI hat dabei geholfen, den Code sauber zu strukturieren, zu dokumentieren und reproduzierbar zu machen.
 
 Verbesserungsvorschläge, ob von Menschen oder KI-assistiert, sind gleichermassen willkommen. 🤖 + 🧑 = 🚐💡
+
+---
+
+## Rechtlicher Hinweis
+
+Dieses Projekt steht in **keiner Verbindung** zur Hobby Wohnwagenwerk GmbH & Co. KG oder einem ihrer verbundenen Unternehmen.
+
+- „HobbyConnect" ist eine eingetragene Marke der Hobby Wohnwagenwerk GmbH & Co. KG und wird hier ausschließlich beschreibend verwendet
+- Das Bluetooth-Protokoll wurde durch eigenständige Analyse für private Interoperabilitätszwecke ermittelt — dies ist in der EU gemäß **§ 69e UrhG** (Dekompilierung zur Herstellung von Interoperabilität) zulässig
+- Das Projekt verfolgt **keine kommerziellen Zwecke** und stellt kein Konkurrenzprodukt dar
+- Die Nutzung erfolgt auf **eigene Verantwortung** — der Hersteller kann das BLE-Protokoll jederzeit ändern
+- Dieses Projekt steht nicht im Widerspruch zu den Nutzungsbedingungen der HobbyConnect-App, da es ausschließlich die Bluetooth-Schnittstelle der Hardware nutzt
 
 ---
 
