@@ -10,13 +10,32 @@ from bleak import BleakClient
 
 # ============================================================
 # ANPASSEN: BLE MAC-Adresse deiner HobbyConnect-Box
-# Ermitteln mit: sudo bluetoothctl → scan on → suche "HobbyConnect"
+#
+# So ermitteln:
+#   sudo bluetoothctl
+#   > power on
+#   > scan on
+#   Warte ca. 10 Sekunden. Suche nach einem Gerät mit dem Namen
+#   "HobbyConnect" oder "HC-..." in der Ausgabe.
+#   Die MAC-Adresse steht links davon, z.B.:
+#   [NEW] Device AA:BB:CC:DD:EE:FF HobbyConnect
+#   > scan off
+#   > exit
+#
+# Format: "XX:XX:XX:XX:XX:XX" (6 Byte, Hex, Doppelpunkte)
 # ============================================================
-BLE_MAC         = "DE:00:05:10:60:23"  # <-- DEINE MAC HIER EINTRAGEN
+BLE_MAC         = "XX:XX:XX:XX:XX:XX"  # <-- DEINE MAC HIER EINTRAGEN
+
+# BLE Service UUID (ermittelt durch Community-Analyse, siehe rawsludge/esphome PR #13327)
+BLE_SERVICE     = "C7841029-FE7C-4894-8532-F97908EF1AE4"
+# BLE Charakteristik UUID für Daten-Lesen/Schreiben
 BLE_CHAR        = "00000001-0000-1000-8000-00805f9b34fb"
+
 BLE_TIMEOUT     = 15.0
 SESSION_TIME    = 300
 RECONNECT_DELAY = 5
+# Wartezeit zwischen Kommandos in Sekunden (200ms empfohlen laut Community-Analyse)
+WAIT_COMMAND    = 0.2
 
 MQTT_HOST   = "localhost"
 MQTT_PORT   = 1883
@@ -25,10 +44,16 @@ TOPIC_CMD   = "hobbyconnect/cmd/#"
 TOPIC_AVAIL = "hobbyconnect/availability"
 
 SAFE_WRITE_KEYS = {
+    # Lichter Ein/Aus
     "LIGHT_WAND","LIGHT_DECKE","LIGHT_KUECHE","LIGHT_AUSSEN",
     "LIGHT_AMB1","LIGHT_AMB2","LIGHT_AMB3","LIGHT_BETTL","LIGHT_BETTR",
     "LIGHT_DUSCHE","LIGHT_WASCH","LIGHT_FUSSB","LIGHT_THERME",
     "LIGHT_ZUSATZL","LIGHT_ZUSATZM","LIGHT_ZUSATZR",
+    # Licht-Dimmer (0-100, falls von HobbyConnect-Box unterstützt)
+    "LIGHT_WAND_DIM","LIGHT_DECKE_DIM","LIGHT_KUECHE_DIM",
+    "LIGHT_AMB1_DIM","LIGHT_AMB2_DIM","LIGHT_AMB3_DIM",
+    "LIGHT_BETTL_DIM","LIGHT_BETTR_DIM",
+    # Klimaanlage Dometic
     "AC_DOM_FJ_ENABLE","AC_DOM_FJ_MODE","AC_DOM_FJ_FAN_SPEED","AC_DOM_FJ_TARGETTEMP",
 }
 
@@ -157,10 +182,10 @@ async def ble_session():
                     while not _cmd_queue.empty():
                         cmd = _cmd_queue.get_nowait()
                         await ble_write_chunked(client, cmd)
-                        await asyncio.sleep(0.1)
+                        await asyncio.sleep(WAIT_COMMAND)
                 except Exception as e:
                     log.error("Write error: %s", e)
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(WAIT_COMMAND)
             await client.stop_notify(BLE_CHAR)
     except Exception as e:
         log.warning("BLE session error: %s", e)

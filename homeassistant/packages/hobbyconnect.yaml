@@ -498,6 +498,68 @@ mqtt:
       payload_off: "0"
       availability_topic: "hobbyconnect/availability"
 
+  # ------------------------------------------------------------------
+  # DIMMER-Sensoren (nur wenn von deiner HobbyConnect-Box unterstützt)
+  # Werte 0-100 = Helligkeit in Prozent
+  # Erkenntnisquelle: Community-Analyse rawsludge/esphome PR #13327
+  # ------------------------------------------------------------------
+  sensor:
+    - name: "WoWa Deckenlicht Dimmer"
+      unique_id: hobbyconnect_dim_decke
+      state_topic: "hobbyconnect/state/LIGHT_DECKE_DIM"
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "WoWa Wandlicht Dimmer"
+      unique_id: hobbyconnect_dim_wand
+      state_topic: "hobbyconnect/state/LIGHT_WAND_DIM"
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "WoWa Küchenlicht Dimmer"
+      unique_id: hobbyconnect_dim_kueche
+      state_topic: "hobbyconnect/state/LIGHT_KUECHE_DIM"
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "Ambientelicht 1 Dimmer"
+      unique_id: hobbyconnect_dim_amb1
+      state_topic: "hobbyconnect/state/LIGHT_AMB1_DIM"
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "Ambientelicht 2 Dimmer"
+      unique_id: hobbyconnect_dim_amb2
+      state_topic: "hobbyconnect/state/LIGHT_AMB2_DIM"
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "Ambientelicht 3 Dimmer"
+      unique_id: hobbyconnect_dim_amb3
+      state_topic: "hobbyconnect/state/LIGHT_AMB3_DIM"
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "WoWa Bettlicht Links Dimmer"
+      unique_id: hobbyconnect_dim_bettl
+      state_topic: "hobbyconnect/state/LIGHT_BETTL_DIM"
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "WoWa Bettlicht Rechts Dimmer"
+      unique_id: hobbyconnect_dim_bettr
+      state_topic: "hobbyconnect/state/LIGHT_BETTR_DIM"
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
   select:
     - name: "Dometic Modus"
       unique_id: hobbyconnect_select_dometic_mode
