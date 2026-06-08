@@ -118,12 +118,7 @@ def _on_message(client, userdata, msg):
     if key not in SAFE_WRITE_KEYS:
         log.warning("Write blocked: %s", key)
         return
-    if key in TOGGLE_KEYS:
-        command = f"cmd-tgl:{key}"
-    elif key.startswith("LIGHT_") and key.endswith("_DIM"):
-        # Dimmer: cmd-set mit Wert 0-100 (nicht togglen!)
-        command = f"cmd-set:{key}={payload}"
-    elif key.startswith("LIGHT_"):
+    if key.startswith("LIGHT_") or key in TOGGLE_KEYS:
         command = f"cmd-tgl:{key}"
     elif key in NET_KEYS:
         command = f"net-{key}-{payload}"
