@@ -409,6 +409,94 @@ mqtt:
       availability_topic: "hobbyconnect/availability"
       icon: mdi:thermometer
 
+    - name: "WoWa Deckenlicht Helligkeit"
+      unique_id: hobbyconnect_num_dim_decke
+      state_topic: "hobbyconnect/state/LIGHT_DECKE_DIM"
+      command_topic: "hobbyconnect/cmd/LIGHT_DECKE_DIM"
+      min: 0
+      max: 100
+      step: 5
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "WoWa Wandlicht Helligkeit"
+      unique_id: hobbyconnect_num_dim_wand
+      state_topic: "hobbyconnect/state/LIGHT_WAND_DIM"
+      command_topic: "hobbyconnect/cmd/LIGHT_WAND_DIM"
+      min: 0
+      max: 100
+      step: 5
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "WoWa Kuechenlicht Helligkeit"
+      unique_id: hobbyconnect_num_dim_kueche
+      state_topic: "hobbyconnect/state/LIGHT_KUECHE_DIM"
+      command_topic: "hobbyconnect/cmd/LIGHT_KUECHE_DIM"
+      min: 0
+      max: 100
+      step: 5
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "Ambientelicht 1 Helligkeit"
+      unique_id: hobbyconnect_num_dim_amb1
+      state_topic: "hobbyconnect/state/LIGHT_AMB1_DIM"
+      command_topic: "hobbyconnect/cmd/LIGHT_AMB1_DIM"
+      min: 0
+      max: 100
+      step: 5
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "Ambientelicht 2 Helligkeit"
+      unique_id: hobbyconnect_num_dim_amb2
+      state_topic: "hobbyconnect/state/LIGHT_AMB2_DIM"
+      command_topic: "hobbyconnect/cmd/LIGHT_AMB2_DIM"
+      min: 0
+      max: 100
+      step: 5
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "Ambientelicht 3 Helligkeit"
+      unique_id: hobbyconnect_num_dim_amb3
+      state_topic: "hobbyconnect/state/LIGHT_AMB3_DIM"
+      command_topic: "hobbyconnect/cmd/LIGHT_AMB3_DIM"
+      min: 0
+      max: 100
+      step: 5
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "WoWa Bettlicht Links Helligkeit"
+      unique_id: hobbyconnect_num_dim_bettl
+      state_topic: "hobbyconnect/state/LIGHT_BETTL_DIM"
+      command_topic: "hobbyconnect/cmd/LIGHT_BETTL_DIM"
+      min: 0
+      max: 100
+      step: 5
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
+    - name: "WoWa Bettlicht Rechts Helligkeit"
+      unique_id: hobbyconnect_num_dim_bettr
+      state_topic: "hobbyconnect/state/LIGHT_BETTR_DIM"
+      command_topic: "hobbyconnect/cmd/LIGHT_BETTR_DIM"
+      min: 0
+      max: 100
+      step: 5
+      unit_of_measurement: "%"
+      availability_topic: "hobbyconnect/availability"
+      icon: mdi:brightness-6
+
   light:
     - name: "WoWa Deckenlicht"
       unique_id: hobbyconnect_light_decke
@@ -585,95 +673,6 @@ mqtt:
         - "Auto"
       availability_topic: "hobbyconnect/availability"
       icon: mdi:fan
-
-
-    - name: "WoWa Deckenlicht Helligkeit"
-      unique_id: hobbyconnect_num_dim_decke
-      state_topic: "hobbyconnect/state/LIGHT_DECKE_DIM"
-      command_topic: "hobbyconnect/cmd/LIGHT_DECKE_DIM"
-      min: 0
-      max: 100
-      step: 5
-      unit_of_measurement: "%"
-      availability_topic: "hobbyconnect/availability"
-      icon: mdi:brightness-6
-
-    - name: "WoWa Wandlicht Helligkeit"
-      unique_id: hobbyconnect_num_dim_wand
-      state_topic: "hobbyconnect/state/LIGHT_WAND_DIM"
-      command_topic: "hobbyconnect/cmd/LIGHT_WAND_DIM"
-      min: 0
-      max: 100
-      step: 5
-      unit_of_measurement: "%"
-      availability_topic: "hobbyconnect/availability"
-      icon: mdi:brightness-6
-
-    - name: "WoWa Kuechenlicht Helligkeit"
-      unique_id: hobbyconnect_num_dim_kueche
-      state_topic: "hobbyconnect/state/LIGHT_KUECHE_DIM"
-      command_topic: "hobbyconnect/cmd/LIGHT_KUECHE_DIM"
-      min: 0
-      max: 100
-      step: 5
-      unit_of_measurement: "%"
-      availability_topic: "hobbyconnect/availability"
-      icon: mdi:brightness-6
-
-    - name: "Ambientelicht 1 Helligkeit"
-      unique_id: hobbyconnect_num_dim_amb1
-      state_topic: "hobbyconnect/state/LIGHT_AMB1_DIM"
-      command_topic: "hobbyconnect/cmd/LIGHT_AMB1_DIM"
-      min: 0
-      max: 100
-      step: 5
-      unit_of_measurement: "%"
-      availability_topic: "hobbyconnect/availability"
-      icon: mdi:brightness-6
-
-    - name: "Ambientelicht 2 Helligkeit"
-      unique_id: hobbyconnect_num_dim_amb2
-      state_topic: "hobbyconnect/state/LIGHT_AMB2_DIM"
-      command_topic: "hobbyconnect/cmd/LIGHT_AMB2_DIM"
-      min: 0
-      max: 100
-      step: 5
-      unit_of_measurement: "%"
-      availability_topic: "hobbyconnect/availability"
-      icon: mdi:brightness-6
-
-    - name: "Ambientelicht 3 Helligkeit"
-      unique_id: hobbyconnect_num_dim_amb3
-      state_topic: "hobbyconnect/state/LIGHT_AMB3_DIM"
-      command_topic: "hobbyconnect/cmd/LIGHT_AMB3_DIM"
-      min: 0
-      max: 100
-      step: 5
-      unit_of_measurement: "%"
-      availability_topic: "hobbyconnect/availability"
-      icon: mdi:brightness-6
-
-    - name: "WoWa Bettlicht Links Helligkeit"
-      unique_id: hobbyconnect_num_dim_bettl
-      state_topic: "hobbyconnect/state/LIGHT_BETTL_DIM"
-      command_topic: "hobbyconnect/cmd/LIGHT_BETTL_DIM"
-      min: 0
-      max: 100
-      step: 5
-      unit_of_measurement: "%"
-      availability_topic: "hobbyconnect/availability"
-      icon: mdi:brightness-6
-
-    - name: "WoWa Bettlicht Rechts Helligkeit"
-      unique_id: hobbyconnect_num_dim_bettr
-      state_topic: "hobbyconnect/state/LIGHT_BETTR_DIM"
-      command_topic: "hobbyconnect/cmd/LIGHT_BETTR_DIM"
-      min: 0
-      max: 100
-      step: 5
-      unit_of_measurement: "%"
-      availability_topic: "hobbyconnect/availability"
-      icon: mdi:brightness-6
 
 template:
   - sensor:
