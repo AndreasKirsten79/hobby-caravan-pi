@@ -155,11 +155,11 @@ Entwicklerwerkzeuge → Zustände → Gerät suchen → Entity-ID kopieren
 | `hobbyconnect/ble_bridge.py` | `BLE_MAC` = MAC deiner HobbyConnect-Box |
 | `hobbyconnect/hobbyconnect-bridge.service` | (wird auto. gesetzt durch install.sh) |
 | `homeassistant/automations.yaml` | `device_id` / `entity_id` deiner BTHome-Sensoren |
-| `homeassistant/packages/standort.yaml` | `device_tracker.DEIN_GERAET` → dein Gerät |
-| `homeassistant/packages/batterie_alarm.yaml` | `notify.DEIN_NOTIFY_SERVICE` → dein Notify-Service |
-| `homeassistant/packages/wetter_alarm.yaml` | `notify.DEIN_NOTIFY_SERVICE` → dein Notify-Service |
+| `homeassistant/packages/standort.yaml` | `device_tracker.DEIN_GERAET` → dein Smartphone |
+| `homeassistant/packages/batterie_alarm.yaml` | `notify.DEIN_NOTIFY_SERVICE` → dein HA Notify-Service |
+| `homeassistant/packages/wetter_alarm.yaml` | `notify.DEIN_NOTIFY_SERVICE` → dein HA Notify-Service |
 | `homeassistant/packages/landstrom.yaml` | `sensor.DEIN_SHELLY_ENERGIE_SENSOR` → dein Shelly |
-| `homeassistant/configuration.yaml` | IP des Shelly für BLU-Scan |
+| `homeassistant/configuration.yaml` | `SHELLY_IP_ADRESSE` → IP deines Shelly BLE-Gateways |
 
 ---
 
@@ -224,9 +224,11 @@ Dieses Projekt lebt von der Community! Beiträge sind ausdrücklich erwünscht �
 
 ## Verwandte Projekte
 
+- **[paveltresnak/hobby-caravan-esphome-ble](https://github.com/paveltresnak/hobby-caravan-esphome-ble)** — Herausragende Arbeit von [@paveltresnak](https://github.com/paveltresnak)! Vollständige ESPHome-Integration für den Hobby De Luxe 495 UL mit ESP32-C3. Enthält eine erweiterte `fendt_caravan`-Komponente mit Dimmer-Steuerung (`net-KEY-N`), Batterie-Sensor (IBS0), Wasserstand und detaillierter [BLE-Protokoll-Dokumentation](https://github.com/paveltresnak/hobby-caravan-esphome-ble/blob/main/docs/ble-protocol.md). Pavel hat als Erster das WRITE-Format für Dimmer (`net-LIGHT_DIMx-N`, N=0..15) dokumentiert und damit der ganzen Community den Weg geebnet. Danke, Pavel! 🙏
+
 - [esphome/esphome #13327 – fendt_caravan](https://github.com/esphome/esphome/pull/13327) — Native ESPHome-Komponente für Fendt & Hobby Wohnwagen von [@rawsludge](https://github.com/rawsludge). Verbindet einen ESP32 direkt per BLE mit der Wohnwagen-Steuerung — vollständig lokal, kein Cloud-Zwang. Unterstützt Beleuchtung (inkl. Dimmer), Kühlschrank, Alde-Heizung und Temperaturen. ⚠️ PR noch offen/experimentell (Stand Juni 2026).
 
-Weitere Wohnwagen-Integrationen folgen — bei Interesse gerne ein Issue eröffnen.
+Wir stehen auf den Schultern dieser Projekte — ohne das Community-Reverse-Engineering wäre dieses Projekt nicht möglich. Bei Interesse gerne ein Issue eröffnen!
 
 ---
 

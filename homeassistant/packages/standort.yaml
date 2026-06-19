@@ -1,22 +1,16 @@
 # ============================================================
-# STANDORT & ZONE DYNAMISCH
+# STANDORT & GPS-QUELLE
 #
-# ANPASSEN – 3 Stellen:
+# ANPASSEN:
+#   device_tracker.DEIN_GERAET
+#   → Entity-ID deines Smartphones/Tablets in HA.
+#   Zu finden unter: Einstellungen → Geräte & Dienste → Companion App
+#   → dein Gerät → Entity "Geräteverfolgung"
+#   Beispiele: device_tracker.pixel_8, device_tracker.samsung_s24
 #
-# 1. device_tracker.DEIN_GERAET
-#    → Der Entity-ID deines Smartphones in HA.
-#    Zu finden unter: Einstellungen → Geräte & Dienste → Companion App
-#    → dein Gerät → Entity "Geräteverfolgung"
-#    Beispiele: device_tracker.pixel_8, device_tracker.samsung_s24
-#
-# 2. sensor.DEIN_GERAET_geocoded_location
-#    → Der Geocoding-Sensor deines Smartphones (Adresse als Text).
-#    Wird automatisch von der HA Companion App erstellt.
-#    Name-Schema: sensor.GERAETENAME_geocoded_location
-#
-# 3. "Zuhause (Dein Ort)"
-#    → Der angezeigte Text wenn du zuhause bist.
-#    Ersetze durch deinen Heimatort, z.B. "Zuhause (München)"
+#   sensor.DEIN_GERAET_geocoded_location
+#   → Geocoding-Sensor (Adresse als Text), wird automatisch
+#   von der HA Companion App erstellt.
 # ============================================================
 
 template:
@@ -24,14 +18,12 @@ template:
       - name: "WoWa Breitengrad"
         unique_id: wowa_latitude
         icon: mdi:latitude
-        unit_of_measurement: "°"
         state: >
           {{ state_attr('device_tracker.DEIN_GERAET', 'latitude') | round(6) }}
 
-      - name: "WoWa Längengrad"
+      - name: "WoWa Laengengrad"
         unique_id: wowa_longitude
         icon: mdi:longitude
-        unit_of_measurement: "°"
         state: >
           {{ state_attr('device_tracker.DEIN_GERAET', 'longitude') | round(6) }}
 
@@ -39,14 +31,39 @@ template:
         unique_id: wowa_standort_adresse
         icon: mdi:map-marker
         state: >
-          {{ states('sensor.DEIN_GERAET_geocoded_location') }}
-
-      - name: "WoWa Standort Zone"
-        unique_id: wowa_standort_zone
-        icon: mdi:map-marker-radius
-        state: >
-          {% if is_state('device_tracker.DEIN_GERAET', 'home') %}
-            Zuhause (DEIN_HEIMATORT)
+          {% set geo = states('sensor.DEIN_GERAET_geocoded_location') %}
+          {% if geo not in ['unknown','unavailable',''] %}
+            {{ geo }}
           {% else %}
-            Unterwegs
+            Standort wird ermittelt...
           {% endif %}
+
+      - name: "WoWa Zeitzone"
+        unique_id: wowa_zeitzone
+        icon: mdi:clock-outline
+        state: >
+          {{ states('sensor.DEIN_GERAET_current_time_zone') }}
+
+# ============================================================
+# AUTOMATION: HA Home-Koordinaten dem Standort des Geräts
+# anpassen — damit weather.forecast_home immer die Vorhersage
+# für den aktuellen Stellplatz zeigt, nicht für Zuhause.
+# ============================================================
+automation:
+  - id: wowa_standort_home_koordinaten_aktualisieren
+    alias: "WoWa: HA Home-Koordinaten nach Tablet-GPS aktualisieren"
+    trigger:
+      - platform: state
+        entity_id: device_tracker.DEIN_GERAET
+    condition:
+      - condition: template
+        value_template: >
+          {{ state_attr('device_tracker.DEIN_GERAET', 'latitude') != None and
+             state_attr('device_tracker.DEIN_GERAET', 'longitude') != None }}
+    action:
+      - service: homeassistant.set_location
+        data:
+          latitude: "{{ state_attr('device_tracker.DEIN_GERAET', 'latitude') }}"
+          longitude: "{{ state_attr('device_tracker.DEIN_GERAET', 'longitude') }}"
+    mode: single
+    max_exceeded: silent
