@@ -1,0 +1,56 @@
+# ============================================================
+# DASHBOARD-TAB: Gewitter / CAPE
+#
+# Eingebunden als eigenes YAML-Dashboard über configuration.yaml
+# (lovelace: dashboards:). Erscheint als eigener Menüpunkt in der
+# Seitenleiste mit einem Tab "Gewitter".
+#
+# Alternative: Statt eines eigenen Dashboards kann der Inhalt von
+# "views:" unten auch als zusätzlicher Tab in ein bestehendes
+# UI-Dashboard eingefügt werden (Dashboard bearbeiten → Drei-Punkte-
+# Menü → Raw-Konfigurationseditor → in die views-Liste einfügen).
+#
+# Für den Trend-Graph (Vorhersage-Card) wird die HACS-Card
+# "apexcharts-card" benötigt (siehe README, HACS-Setup optional).
+# Ohne HACS werden Gauge- und Entities-Card trotzdem angezeigt.
+# ============================================================
+
+views:
+  - title: Gewitter
+    path: gewitter
+    icon: mdi:weather-lightning
+    cards:
+      - type: gauge
+        entity: sensor.wowa_cape_aktuell
+        name: Gewitterpotenzial (CAPE)
+        unit: J/kg
+        min: 0
+        max: 3000
+        severity:
+          green: 0
+          yellow: 300
+          red: 1000
+
+      - type: entities
+        title: Gewitter-Details
+        entities:
+          - entity: sensor.wowa_gewitterrisiko
+            name: Risiko
+          - entity: sensor.wowa_cin_aktuell
+            name: Deckel (CIN)
+          - entity: sensor.wowa_lifted_index_aktuell
+            name: Lifted Index
+
+      - type: custom:apexcharts-card
+        header:
+          title: CAPE-Verlauf (48h)
+          show: true
+        graph_span: 48h
+        series:
+          - entity: sensor.wowa_cape_vorhersage
+            name: CAPE
+            data_generator: |
+              return entity.attributes.time.map((t, i) => [
+                new Date(t).getTime(),
+                entity.attributes.cape[i]
+              ]);
