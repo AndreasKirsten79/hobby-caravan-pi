@@ -1,0 +1,172 @@
+# ============================================================
+# WETTERWARNUNGEN - GPS-basiert, EU-weit
+#
+# Quelle: OpenWeatherMap One Call API 3.0
+# Nutzt die dynamischen HA Home-Koordinaten (folgen dem Tablet-GPS)
+# Abdeckung: Weltweit, inkl. DE, AT, IT, CZ, SI, HR
+#
+# ANPASSEN:
+#   DEIN_OWM_API_KEY → Kostenloser API-Key von openweathermap.org
+#   (Registrieren → API Keys → One Call API 3.0 aktivieren)
+#   Kostenlos: 1000 Calls/Tag (wir fragen alle 30 Min = 48/Tag)
+# ============================================================
+
+rest:
+  - resource_template: >
+      https://api.openweathermap.org/data/3.0/onecall?lat={{ state_attr('zone.home', 'latitude') }}&lon={{ state_attr('zone.home', 'longitude') }}&exclude=minutely,hourly,daily&appid=DEIN_OWM_API_KEY&lang=de&units=metric
+    scan_interval: 1800
+    sensor:
+      - name: "Wetterwarnung Aktiv"
+        unique_id: wetterwarnung_aktiv
+        icon: mdi:alert-circle
+        value_template: >
+          {% if value_json.alerts is defined and value_json.alerts | length > 0 %}
+            {{ value_json.alerts | length }} Warnung(en)
+          {% else %}
+            Keine Warnungen
+          {% endif %}
+        json_attributes_path: "$"
+        json_attributes:
+          - alerts
+
+      - name: "Wetterwarnung 1"
+        unique_id: wetterwarnung_1
+        icon: mdi:weather-lightning-rainy
+        value_template: >
+          {% if value_json.alerts is defined and value_json.alerts | length > 0 %}
+            {{ value_json.alerts[0].event }}
+          {% else %}
+            Keine
+          {% endif %}
+        attributes:
+          beschreibung: >
+            {% if value_json.alerts is defined and value_json.alerts | length > 0 %}
+              {{ value_json.alerts[0].description }}
+            {% else %}
+              -
+            {% endif %}
+          quelle: >
+            {% if value_json.alerts is defined and value_json.alerts | length > 0 %}
+              {{ value_json.alerts[0].sender_name }}
+            {% else %}
+              -
+            {% endif %}
+          beginn: >
+            {% if value_json.alerts is defined and value_json.alerts | length > 0 %}
+              {{ value_json.alerts[0].start | timestamp_local }}
+            {% else %}
+              -
+            {% endif %}
+          ende: >
+            {% if value_json.alerts is defined and value_json.alerts | length > 0 %}
+              {{ value_json.alerts[0].end | timestamp_local }}
+            {% else %}
+              -
+            {% endif %}
+          tags: >
+            {% if value_json.alerts is defined and value_json.alerts | length > 0 %}
+              {{ value_json.alerts[0].tags | join(', ') }}
+            {% else %}
+              -
+            {% endif %}
+
+      - name: "Wetterwarnung 2"
+        unique_id: wetterwarnung_2
+        icon: mdi:weather-lightning-rainy
+        value_template: >
+          {% if value_json.alerts is defined and value_json.alerts | length > 1 %}
+            {{ value_json.alerts[1].event }}
+          {% else %}
+            Keine
+          {% endif %}
+        attributes:
+          beschreibung: >
+            {% if value_json.alerts is defined and value_json.alerts | length > 1 %}
+              {{ value_json.alerts[1].description }}
+            {% else %}
+              -
+            {% endif %}
+          quelle: >
+            {% if value_json.alerts is defined and value_json.alerts | length > 1 %}
+              {{ value_json.alerts[1].sender_name }}
+            {% else %}
+              -
+            {% endif %}
+          beginn: >
+            {% if value_json.alerts is defined and value_json.alerts | length > 1 %}
+              {{ value_json.alerts[1].start | timestamp_local }}
+            {% else %}
+              -
+            {% endif %}
+          ende: >
+            {% if value_json.alerts is defined and value_json.alerts | length > 1 %}
+              {{ value_json.alerts[1].end | timestamp_local }}
+            {% else %}
+              -
+            {% endif %}
+
+      - name: "Wetterwarnung Land"
+        unique_id: wetterwarnung_land
+        icon: mdi:earth
+        value_template: >
+          {% if value_json.timezone is defined %}
+            {{ value_json.timezone }}
+          {% else %}
+            unbekannt
+          {% endif %}
+
+# ============================================================
+# TEMPLATE: Länder-Erkennung aus Geocoded-Adresse
+# ============================================================
+template:
+  - sensor:
+      - name: "WoWa Land"
+        unique_id: wowa_land
+        icon: mdi:flag
+        state: >
+          {% set addr = states('sensor.wowa_standort_adresse') %}
+          {% if 'Deutschland' in addr %}Deutschland
+          {% elif 'Österreich' in addr or 'Austria' in addr %}Österreich
+          {% elif 'Italia' in addr or 'Italien' in addr or 'Italy' in addr %}Italien
+          {% elif 'Česko' in addr or 'Tschechien' in addr or 'Czech' in addr %}Tschechien
+          {% elif 'Slovenija' in addr or 'Slowenien' in addr or 'Slovenia' in addr %}Slowenien
+          {% elif 'Hrvatska' in addr or 'Kroatien' in addr or 'Croatia' in addr %}Kroatien
+          {% elif addr in ['unknown','unavailable','Standort wird ermittelt...',''] %}
+            Wird ermittelt...
+          {% else %}
+            {{ addr.split(', ')[-1] }}
+          {% endif %}
+
+# ============================================================
+# AUTOMATION: Push-Benachrichtigung bei neuer Wetterwarnung
+# ============================================================
+automation:
+  - id: wowa_wetterwarnung_push
+    alias: "WoWa: Wetterwarnung Push"
+    trigger:
+      - platform: state
+        entity_id: sensor.wetterwarnung_1
+        not_from:
+          - "unavailable"
+          - "unknown"
+        not_to:
+          - "Keine"
+          - "unavailable"
+          - "unknown"
+    condition:
+      - condition: template
+        value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+    action:
+      - service: persistent_notification.create
+        data:
+          title: "⚠️ Wetterwarnung"
+          message: >
+            {{ states('sensor.wetterwarnung_1') }}
+
+            {{ state_attr('sensor.wetterwarnung_1', 'beschreibung') }}
+
+            Quelle: {{ state_attr('sensor.wetterwarnung_1', 'quelle') }}
+            Von: {{ state_attr('sensor.wetterwarnung_1', 'beginn') }}
+            Bis: {{ state_attr('sensor.wetterwarnung_1', 'ende') }}
+          notification_id: wetterwarnung
+    mode: single

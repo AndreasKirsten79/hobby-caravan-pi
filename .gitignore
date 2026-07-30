@@ -10,3 +10,7 @@ homeassistant/deps/
 homeassistant/tts/
 homeassistant/*.log
 homeassistant/*.log.*
+
+# Persoenliche Notizen mit echten Zugangsdaten (IP, SSH-Passwort, BLE-MAC) – nur lokal/OneDrive
+Hobby-Caravan-SmartHome-Projekt.md
+backups/

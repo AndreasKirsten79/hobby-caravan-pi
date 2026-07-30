@@ -1,0 +1,136 @@
+# ============================================================
+# SONNEN-AUSRICHTUNG RELATIV ZUM WOHNWAGEN
+#
+# Nutzung:
+#   1. Beim Aufstellen: iPhone Kompass-App öffnen,
+#      in Fahrtrichtung (Deichsel vorne) halten → Grad ablesen
+#   2. Wert in HA Dashboard unter "🧭 Wohnwagen-Ausrichtung" eingeben
+#   3. Die Sensoren berechnen automatisch wo Sonne auf/unter geht
+#
+# Azimut-Konvention: 0°=Nord, 90°=Ost, 180°=Süd, 270°=West
+# ============================================================
+
+input_number:
+  wohnwagen_ausrichtung_grad:
+    name: "Wohnwagen Ausrichtung"
+    min: 0
+    max: 360
+    step: 1
+    unit_of_measurement: "°"
+    icon: mdi:compass
+    mode: box
+
+template:
+  - sensor:
+      # ---------------------------------------------------
+      # Aktuelle Sonnenposition relativ zum Wohnwagen
+      # Nutzt sun.sun Azimut (live, sehr genau)
+      # ---------------------------------------------------
+      - name: "Sonne Position relativ"
+        unique_id: sonne_position_relativ
+        icon: mdi:weather-sunny
+        state: >
+          {% set wowa = states('input_number.wohnwagen_ausrichtung_grad') | float(0) %}
+          {% set az = state_attr('sun.sun', 'azimuth') | float(0) %}
+          {% set el = state_attr('sun.sun', 'elevation') | float(-90) %}
+          {% if el < 0 %}
+            Unter dem Horizont 🌙
+          {% else %}
+            {% set rel = ((az - wowa) + 360) % 360 %}
+            {% if rel < 22.5 or rel >= 337.5 %}Direkt vorne ⬆️
+            {% elif rel < 67.5 %}Vorne rechts ↗️
+            {% elif rel < 112.5 %}Rechts ➡️
+            {% elif rel < 157.5 %}Hinten rechts ↘️
+            {% elif rel < 202.5 %}Direkt hinten ⬇️
+            {% elif rel < 247.5 %}Hinten links ↙️
+            {% elif rel < 292.5 %}Links ⬅️
+            {% else %}Vorne links ↖️
+            {% endif %}
+          {% endif %}
+        attributes:
+          azimut_absolut: "{{ state_attr('sun.sun', 'azimuth') | round(1) }}°"
+          elevation: "{{ state_attr('sun.sun', 'elevation') | round(1) }}°"
+          relativer_winkel: >
+            {% set wowa = states('input_number.wohnwagen_ausrichtung_grad') | float(0) %}
+            {% set az = state_attr('sun.sun', 'azimuth') | float(0) %}
+            {{ ((az - wowa) + 360) % 360 | round(1) }}°
+
+      # ---------------------------------------------------
+      # Sonnenaufgang: Richtung (Monats-Näherung für 50°N)
+      # Aufgang Azimut: Jun ~55°, Mär/Sep ~90°, Dez ~130°
+      # ---------------------------------------------------
+      - name: "Sonnenaufgang Richtung"
+        unique_id: sonnenaufgang_richtung
+        icon: mdi:weather-sunset-up
+        state: >
+          {% set wowa = states('input_number.wohnwagen_ausrichtung_grad') | float(0) %}
+          {% set m = now().month %}
+          {% set aufgang_az = [133,125,100,82,64,52,55,68,88,105,122,132][m-1] %}
+          {% set rel = ((aufgang_az - wowa) + 360) % 360 %}
+          {% set zeit = as_timestamp(state_attr('sun.sun','next_rising')) | timestamp_custom('%H:%M') %}
+          {% if rel < 22.5 or rel >= 337.5 %}Vorne ⬆️ ({{ zeit }})
+          {% elif rel < 67.5 %}Vorne rechts ↗️ ({{ zeit }})
+          {% elif rel < 112.5 %}Rechts ➡️ ({{ zeit }})
+          {% elif rel < 157.5 %}Hinten rechts ↘️ ({{ zeit }})
+          {% elif rel < 202.5 %}Hinten ⬇️ ({{ zeit }})
+          {% elif rel < 247.5 %}Hinten links ↙️ ({{ zeit }})
+          {% elif rel < 292.5 %}Links ⬅️ ({{ zeit }})
+          {% else %}Vorne links ↖️ ({{ zeit }})
+          {% endif %}
+        attributes:
+          aufgang_azimut: >
+            {% set m = now().month %}
+            {{ [133,125,100,82,64,52,55,68,88,105,122,132][m-1] }}°
+          uhrzeit: "{{ as_timestamp(state_attr('sun.sun','next_rising')) | timestamp_custom('%H:%M') }}"
+
+      # ---------------------------------------------------
+      # Sonnenuntergang: Richtung (Monats-Näherung für 50°N)
+      # Untergang Azimut: Jun ~305°, Mär/Sep ~270°, Dez ~228°
+      # ---------------------------------------------------
+      - name: "Sonnenuntergang Richtung"
+        unique_id: sonnenuntergang_richtung
+        icon: mdi:weather-sunset-down
+        state: >
+          {% set wowa = states('input_number.wohnwagen_ausrichtung_grad') | float(0) %}
+          {% set m = now().month %}
+          {% set untergang_az = [228,235,260,278,296,308,305,292,272,255,238,228][m-1] %}
+          {% set rel = ((untergang_az - wowa) + 360) % 360 %}
+          {% set zeit = as_timestamp(state_attr('sun.sun','next_setting')) | timestamp_custom('%H:%M') %}
+          {% if rel < 22.5 or rel >= 337.5 %}Vorne ⬆️ ({{ zeit }})
+          {% elif rel < 67.5 %}Vorne rechts ↗️ ({{ zeit }})
+          {% elif rel < 112.5 %}Rechts ➡️ ({{ zeit }})
+          {% elif rel < 157.5 %}Hinten rechts ↘️ ({{ zeit }})
+          {% elif rel < 202.5 %}Hinten ⬇️ ({{ zeit }})
+          {% elif rel < 247.5 %}Hinten links ↙️ ({{ zeit }})
+          {% elif rel < 292.5 %}Links ⬅️ ({{ zeit }})
+          {% else %}Vorne links ↖️ ({{ zeit }})
+          {% endif %}
+        attributes:
+          untergang_azimut: >
+            {% set m = now().month %}
+            {{ [228,235,260,278,296,308,305,292,272,255,238,228][m-1] }}°
+          uhrzeit: "{{ as_timestamp(state_attr('sun.sun','next_setting')) | timestamp_custom('%H:%M') }}"
+
+      # ---------------------------------------------------
+      # Sonnenmittag: Richtung (immer ca. Süd, aber relativ)
+      # Bei 50°N steht Mittagssonne immer Richtung Süd (~180°)
+      # ---------------------------------------------------
+      - name: "Sonnenmittag Richtung"
+        unique_id: sonnenmittag_richtung
+        icon: mdi:white-balance-sunny
+        state: >
+          {% set wowa = states('input_number.wohnwagen_ausrichtung_grad') | float(0) %}
+          {% set mittag_az = 180 %}
+          {% set rel = ((mittag_az - wowa) + 360) % 360 %}
+          {% set zeit = as_timestamp(state_attr('sun.sun','next_noon')) | timestamp_custom('%H:%M') %}
+          {% if rel < 22.5 or rel >= 337.5 %}Vorne ⬆️ ({{ zeit }})
+          {% elif rel < 67.5 %}Vorne rechts ↗️ ({{ zeit }})
+          {% elif rel < 112.5 %}Rechts ➡️ ({{ zeit }})
+          {% elif rel < 157.5 %}Hinten rechts ↘️ ({{ zeit }})
+          {% elif rel < 202.5 %}Hinten ⬇️ ({{ zeit }})
+          {% elif rel < 247.5 %}Hinten links ↙️ ({{ zeit }})
+          {% elif rel < 292.5 %}Links ⬅️ ({{ zeit }})
+          {% else %}Vorne links ↖️ ({{ zeit }})
+          {% endif %}
+        attributes:
+          uhrzeit: "{{ as_timestamp(state_attr('sun.sun','next_noon')) | timestamp_custom('%H:%M') }}"

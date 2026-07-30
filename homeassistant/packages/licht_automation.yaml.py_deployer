@@ -1,0 +1,85 @@
+content = """\
+# ============================================================
+# LICHT-AUTOMATIONEN
+#
+# Ambientelicht bei Sonnenuntergang (nur wenn jemand da ist)
+# Außenlicht bei Dämmerung (nur wenn jemand da ist)
+# ============================================================
+
+automation:
+  # ---------------------------------------------------------
+  # Ambientelicht AN bei Sonnenuntergang
+  # Bedingungen:
+  #   - Sonne geht unter (elevation sinkt unter 3°)
+  #   - In letzten 30 Min war Bewegung (= jemand ist im WoWa)
+  #   - Ambientelicht ist noch nicht an
+  # ---------------------------------------------------------
+  - id: wowa_ambientelicht_sonnenuntergang
+    alias: "WoWa: Ambientelicht bei Sonnenuntergang"
+    trigger:
+      - platform: numeric_state
+        entity_id: sun.sun
+        attribute: elevation
+        below: 3
+    condition:
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.bthome_sensor_16c5_bewegung
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.bthome_sensor_d346_bewegung
+            state: "on"
+          - condition: template
+            value_template: >
+              {{ as_timestamp(now()) - as_timestamp(states.binary_sensor.bthome_sensor_16c5_bewegung.last_changed) < 1800
+                 or as_timestamp(now()) - as_timestamp(states.binary_sensor.bthome_sensor_d346_bewegung.last_changed) < 1800 }}
+      - condition: state
+        entity_id: light.wowa_ambientelicht_1
+        state: "off"
+    action:
+      - service: light.turn_on
+        target:
+          entity_id:
+            - light.wowa_ambientelicht_1
+            - light.wowa_ambientelicht_2
+            - light.wowa_ambientelicht_3
+    mode: single
+
+  # ---------------------------------------------------------
+  # Außenlicht AN bei Dämmerung
+  # Wenn Sonne unter 0° und Lux am Eingang < 50
+  # ---------------------------------------------------------
+  - id: wowa_aussenlicht_daemmerung
+    alias: "WoWa: Außenlicht bei Dämmerung"
+    trigger:
+      - platform: numeric_state
+        entity_id: sun.sun
+        attribute: elevation
+        below: 0
+    condition:
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.bthome_sensor_16c5_bewegung
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.bthome_sensor_d346_bewegung
+            state: "on"
+          - condition: template
+            value_template: >
+              {{ as_timestamp(now()) - as_timestamp(states.binary_sensor.bthome_sensor_16c5_bewegung.last_changed) < 1800
+                 or as_timestamp(now()) - as_timestamp(states.binary_sensor.bthome_sensor_d346_bewegung.last_changed) < 1800 }}
+      - condition: state
+        entity_id: light.wowa_aussenlicht
+        state: "off"
+    action:
+      - service: light.turn_on
+        target:
+          entity_id: light.wowa_aussenlicht
+    mode: single
+"""
+
+with open('/opt/caravan-data/homeassistant/packages/licht_automation.yaml', 'w', encoding='utf-8') as f:
+    f.write(content)
+print('ok', len(content), 'bytes')

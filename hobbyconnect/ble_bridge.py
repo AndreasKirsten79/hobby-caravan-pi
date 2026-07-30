@@ -28,7 +28,7 @@ BLE_MAC         = "XX:XX:XX:XX:XX:XX"  # <-- DEINE MAC HIER EINTRAGEN
 
 # BLE Service UUID (ermittelt durch Community-Analyse, siehe rawsludge/esphome PR #13327)
 BLE_SERVICE     = "C7841029-FE7C-4894-8532-F97908EF1AE4"
-# BLE Charakteristik UUID für Daten-Lesen/Schreiben
+# BLE Charakteristik UUID für Daten-Lesen/Schreiben (0x0001, NOTIFY + WRITE)
 BLE_CHAR        = "00000001-0000-1000-8000-00805f9b34fb"
 
 BLE_TIMEOUT     = 15.0
@@ -43,28 +43,55 @@ TOPIC_STATE = "hobbyconnect/state/{key}"
 TOPIC_CMD   = "hobbyconnect/cmd/#"
 TOPIC_AVAIL = "hobbyconnect/availability"
 
-SAFE_WRITE_KEYS = {
-    # Lichter Ein/Aus
-    "LIGHT_WAND","LIGHT_DECKE","LIGHT_KUECHE","LIGHT_AUSSEN",
-    "LIGHT_AMB1","LIGHT_AMB2","LIGHT_AMB3","LIGHT_BETTL","LIGHT_BETTR",
-    "LIGHT_DUSCHE","LIGHT_WASCH","LIGHT_FUSSB","LIGHT_THERME",
-    "LIGHT_ZUSATZL","LIGHT_ZUSATZM","LIGHT_ZUSATZR",
-    # Licht-Dimmer (0-100, falls von HobbyConnect-Box unterstützt)
-    "LIGHT_WAND_DIM","LIGHT_DECKE_DIM","LIGHT_KUECHE_DIM",
-    "LIGHT_AMB1_DIM","LIGHT_AMB2_DIM","LIGHT_AMB3_DIM",
-    "LIGHT_BETTL_DIM","LIGHT_BETTR_DIM",
-    # Klimaanlage Dometic
-    "AC_DOM_FJ_ENABLE","AC_DOM_FJ_MODE","AC_DOM_FJ_FAN_SPEED","AC_DOM_FJ_TARGETTEMP",
-}
+# ============================================================
+# WRITE-Befehlsformate (per Live-Test verifiziert, Quellen:
+#   - esphome/esphome PR #13327  (rawsludge / tomasslivka)
+#   - paveltresnak/hobby-caravan-esphome-ble  docs/ble-protocol.md
+#   - Issue #1 Kommentar von paveltresnak)
+#
+# Die Box kennt ZWEI WRITE-Formate – cmd-set:KEY=N funktioniert NICHT
+# zuverlässig (Box ignoriert es), deshalb hier bewusst nicht mehr genutzt:
+#
+#   1) Ein/Aus (bool)      -> "cmd-tgl:KEY"      TOGGLE, kippt den Zustand
+#   2) Wert setzen (Dimmer,
+#      Lednice-Quelle/Temp) -> "net-KEY-N"        setzt den Pegel direkt
+# ============================================================
 
+# --- (1) Bool-Kanäle: WRITE via "cmd-tgl:KEY" (Toggle!) -------------------
+# Lichter Ein/Aus + Lednice/Bojler/Fußboden + Klima Ein/Aus.
 TOGGLE_KEYS = {
+    # Schaltbare Lichter (on/off)
+    "LIGHT_KUECHE", "LIGHT_AUSSEN",
+    "LIGHT_AMB1", "LIGHT_AMB2", "LIGHT_AMB3",
+    "LIGHT_WAND", "LIGHT_DECKE", "LIGHT_BETTL", "LIGHT_BETTR",
+    "LIGHT_DUSCHE", "LIGHT_WASCH", "LIGHT_FUSSB", "LIGHT_THERME",
+    "LIGHT_ZUSATZL", "LIGHT_ZUSATZM", "LIGHT_ZUSATZR",
+    # Lednice / Heizung / Bojler
+    "FRIDGE_ON_OFF", "FLOOR_HEATER_ON", "THERME_ON",
+    # Klimaanlage Dometic Ein/Aus
     "AC_DOM_FJ_ENABLE",
 }
 
+# --- (2) Wert-Kanäle: WRITE via "net-KEY-N" -------------------------------
+# Dimmer + Lednice-Quelle/Temp + Klima-Stufen.
 NET_KEYS = {
-    "AC_DOM_FJ_FAN_SPEED",
-    "AC_DOM_FJ_MODE",
+    # Dimmer (verifiziert: LIGHT_DIM2 = Wohnraum, LIGHT_DIM3 = Ambient hinten,
+    # LIGHT_DIM1 vermutlich weiterer Dimmer). N = 0..15.
+    "LIGHT_DIM1", "LIGHT_DIM2", "LIGHT_DIM3",
+    # Lednice
+    "FRIDGE_SOURCE",   # 0=Auto / 1=Gas / 2=12V / 3=230V
+    "FRIDGE_TEMP",     # 1..5 (5 = max. Kühlung, KEIN °C)
+    # Klimaanlage Dometic (Format net- angenommen, NICHT live verifiziert)
+    "AC_DOM_FJ_MODE", "AC_DOM_FJ_FAN_SPEED", "AC_DOM_FJ_TARGETTEMP",
 }
+
+# Reine Dimmer-Keys -> Wert wird auf [DIM_MIN..DIM_MAX] geklemmt.
+DIM_KEYS = {"LIGHT_DIM1", "LIGHT_DIM2", "LIGHT_DIM3"}
+DIM_MIN  = 0
+DIM_MAX  = 15  # Pavel: 0..15. Bei abweichender Firmware ggf. anpassen (z.B. 100).
+
+# Erlaubte WRITE-Keys = alles, was wir oben definiert haben.
+SAFE_WRITE_KEYS = TOGGLE_KEYS | NET_KEYS
 
 logging.basicConfig(
     level=logging.INFO,
@@ -77,6 +104,17 @@ _running     = True
 _fragment    = ""
 _cmd_queue   = queue.Queue()
 _mqtt_client = None
+# Letzter von der Box gemeldeter Rohwert je KEY (für zustands-bewusstes Toggle).
+_last_state  = {}
+
+
+def _state_is_on(raw: str) -> bool:
+    """Box meldet bool-Lichter als '0'/'1' (teils '00'/'01'). Alles != 0 = AN."""
+    s = raw.strip()
+    try:
+        return int(s) != 0
+    except ValueError:
+        return s.lower() in ("on", "true", "an", "ein")
 
 
 async def ble_write_chunked(client, cmd: str, response: bool = True):
@@ -116,19 +154,40 @@ def _on_message(client, userdata, msg):
     if not payload:
         return
     if key not in SAFE_WRITE_KEYS:
-        log.warning("Write blocked: %s", key)
+        log.warning("Write blocked (unknown key): %s", key)
         return
-    if key.startswith("LIGHT_") or key in TOGGLE_KEYS:
-        command = f"cmd-tgl:{key}"
-    elif key in NET_KEYS:
-        command = f"net-{key}-{payload}"
+
+    if key in NET_KEYS:
+        # net-KEY-N : Wert direkt setzen.
+        value = payload
+        if key in DIM_KEYS:
+            try:
+                n = int(round(float(payload.replace(",", "."))))
+            except ValueError:
+                log.warning("Invalid dim value for %s: %r", key, payload)
+                return
+            n = max(DIM_MIN, min(DIM_MAX, n))
+            value = str(n)
+        command = f"net-{key}-{value}"
+
     else:
-        command = f"cmd-set:{key}={payload}"
+        # TOGGLE_KEYS: cmd-tgl:KEY kippt den Zustand (kein "set").
+        # Zustands-bewusst: nur senden, wenn Soll != Ist (verhindert Desync,
+        # weil HA on/off schickt, die Box aber nur togglet).
+        desired = _state_is_on(payload)
+        current = _last_state.get(key)
+        if current is not None and _state_is_on(current) == desired:
+            log.info("Toggle skipped (already %s): %s",
+                     "ON" if desired else "OFF", key)
+            return
+        command = f"cmd-tgl:{key}"
+
     _cmd_queue.put(command)
     log.info("CMD queued: %s", command)
 
 
 def mqtt_pub(key, value):
+    _last_state[key.upper()] = value
     _mqtt_client.publish(TOPIC_STATE.format(key=key), value, qos=0, retain=True)
 
 
@@ -210,6 +269,7 @@ async def main():
 def _stop(*_):
     global _running
     _running = False
+    # (keine weitere Logik – sauberer Shutdown via _running-Flag)
 
 
 if __name__ == "__main__":

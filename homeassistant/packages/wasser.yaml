@@ -1,0 +1,88 @@
+# ============================================================
+# WASSER-TRACKING
+#
+# - Gefilterter Wasserstand (ignoriert unavailable/unknown)
+# - Liter-Berechnung (47L Tank)
+# - Verbrauchszähler (Tag/Woche/Monat/Jahr)
+# ============================================================
+
+template:
+  - sensor:
+      - name: "WoWa Wasser Liter"
+        unique_id: wowa_wasser_liter
+        unit_of_measurement: "L"
+        icon: mdi:water
+        state_class: total
+        availability: >
+          {{ states('sensor.wowa_wasserstand') | is_number }}
+        state: >
+          {{ (states('sensor.wowa_wasserstand') | float(0) * 47 / 100) | round(1) }}
+
+      - name: "WoWa Wasser Prozent"
+        unique_id: wowa_wasser_prozent
+        unit_of_measurement: "%"
+        icon: mdi:gauge
+        state_class: measurement
+        availability: >
+          {{ states('sensor.wowa_wasserstand') | is_number }}
+        state: >
+          {{ states('sensor.wowa_wasserstand') | float(0) | round(0) | int }}
+
+      - name: "WoWa Wasser Fehlend bis 75%"
+        unique_id: wowa_wasser_fehlend_75
+        unit_of_measurement: "L"
+        icon: mdi:water-plus
+        availability: >
+          {{ states('sensor.wowa_wasserstand') | is_number }}
+        state: >
+          {% set stand = states('sensor.wowa_wasserstand') | float(0) %}
+          {% if stand < 75 %}
+            {{ ((75 - stand) * 47 / 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+
+      - name: "WoWa Wasser Verbrauch Sensor"
+        unique_id: wowa_wasser_verbrauch_sensor
+        unit_of_measurement: "L"
+        icon: mdi:water-minus
+        state_class: total_increasing
+        availability: >
+          {{ states('sensor.wowa_wasser_liter') | is_number }}
+        state: >
+          {% set current = states('sensor.wowa_wasser_liter') | float(-1) %}
+          {% set prev = this.state | float(0) %}
+          {% if current < 0 %}
+            {{ prev }}
+          {% elif current > prev + 5 %}
+            0
+          {% elif current <= prev %}
+            {{ (prev - current + this.state | float(0)) | round(1) }}
+          {% else %}
+            {{ this.state | float(0) }}
+          {% endif %}
+
+utility_meter:
+  wasser_verbrauch_tag:
+    source: sensor.wowa_wasser_verbrauch_sensor
+    name: "Wasser Verbrauch Tag"
+    cycle: daily
+    unique_id: wowa_wasser_verbrauch_tag
+
+  wasser_verbrauch_woche:
+    source: sensor.wowa_wasser_verbrauch_sensor
+    name: "Wasser Verbrauch Woche"
+    cycle: weekly
+    unique_id: wowa_wasser_verbrauch_woche
+
+  wasser_verbrauch_monat:
+    source: sensor.wowa_wasser_verbrauch_sensor
+    name: "Wasser Verbrauch Monat"
+    cycle: monthly
+    unique_id: wowa_wasser_verbrauch_monat
+
+  wasser_verbrauch_jahr:
+    source: sensor.wowa_wasser_verbrauch_sensor
+    name: "Wasser Verbrauch Jahr"
+    cycle: yearly
+    unique_id: wowa_wasser_verbrauch_jahr
