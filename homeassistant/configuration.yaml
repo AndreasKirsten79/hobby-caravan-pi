@@ -4,6 +4,15 @@ default_config:
 frontend:
   themes: !include_dir_merge_named themes
 
+lovelace:
+  dashboards:
+    wetter-cape:
+      mode: yaml
+      title: Wetter
+      icon: mdi:weather-lightning
+      show_in_sidebar: true
+      filename: dashboards/wetter_cape.yaml
+
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml

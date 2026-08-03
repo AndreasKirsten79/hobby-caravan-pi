@@ -1,0 +1,68 @@
+# ============================================================
+# GEWITTERPOTENZIAL (CAPE) - Open-Meteo API
+# Liefert CAPE, CIN (Deckel) und Lifted Index für den aktuellen
+# Standort des Wohnwagens, kostenlos & ohne API-Key.
+#
+# Voraussetzung: packages/standort.yaml ist eingerichtet
+# (sensor.wowa_breitengrad / sensor.wowa_laengengrad liefern
+# gültige Werte über device_tracker.DEIN_GERAET).
+# ============================================================
+
+rest:
+  - resource_template: >-
+      https://api.open-meteo.com/v1/forecast?latitude={{ states('sensor.wowa_breitengrad') }}&longitude={{ states('sensor.wowa_laengengrad') }}&current=cape,lifted_index,convective_inhibition&hourly=cape&forecast_days=2&timezone=Europe%2FBerlin
+    scan_interval: 1800  # alle 30 Min reicht, Vorhersage ändert sich nicht minütlich
+    sensor:
+      - name: "WoWa CAPE Aktuell"
+        unique_id: wowa_cape_aktuell
+        unit_of_measurement: "J/kg"
+        icon: mdi:weather-lightning
+        state_class: measurement
+        value_template: "{{ value_json.current.cape | round(0) }}"
+
+      - name: "WoWa CIN Aktuell"
+        unique_id: wowa_cin_aktuell
+        unit_of_measurement: "J/kg"
+        icon: mdi:umbrella-closed
+        state_class: measurement
+        value_template: "{{ value_json.current.convective_inhibition | round(0) }}"
+
+      - name: "WoWa Lifted Index Aktuell"
+        unique_id: wowa_lifted_index_aktuell
+        icon: mdi:speedometer
+        state_class: measurement
+        value_template: "{{ value_json.current.lifted_index | round(1) }}"
+
+      - name: "WoWa CAPE Vorhersage"
+        unique_id: wowa_cape_vorhersage
+        unit_of_measurement: "J/kg"
+        icon: mdi:chart-line
+        state_class: measurement
+        value_template: "{{ value_json.current.cape | round(0) }}"
+        json_attributes_path: "$.hourly"
+        json_attributes:
+          - time
+          - cape
+
+# ============================================================
+# Gewitterrisiko als Text/Icon - fasst CAPE in verständliche
+# Kategorien zusammen (grobe, in Mitteleuropa übliche Schwellen).
+# ============================================================
+template:
+  - sensor:
+      - name: "WoWa Gewitterrisiko"
+        unique_id: wowa_gewitterrisiko
+        state: >
+          {% set cape = states('sensor.wowa_cape_aktuell') | float(0) %}
+          {% if cape < 300 %} Gering
+          {% elif cape < 1000 %} Moderat
+          {% elif cape < 2500 %} Hoch
+          {% else %} Extrem
+          {% endif %}
+        icon: >
+          {% set cape = states('sensor.wowa_cape_aktuell') | float(0) %}
+          {% if cape < 300 %} mdi:weather-partly-cloudy
+          {% elif cape < 1000 %} mdi:weather-lightning
+          {% elif cape < 2500 %} mdi:weather-lightning-rainy
+          {% else %} mdi:alert
+          {% endif %}

@@ -145,6 +145,11 @@ Oder die IDs direkt aus dem HA Developer-Tool kopieren:
 Entwicklerwerkzeuge → Zustände → Gerät suchen → Entity-ID kopieren
 ```
 
+**g) Gewitter/CAPE-Dashboard** (optional)
+`packages/cape_wetter.yaml` holt CAPE, CIN und Lifted Index kostenlos von der [Open-Meteo API](https://open-meteo.com) für den aktuellen Standort (kein API-Key nötig) — Voraussetzung ist ein eingerichtetes `packages/standort.yaml` (Schritt weiter oben, Punkt "Was muss jeder Nutzer anpassen?").
+
+Der Tab dazu liegt in `homeassistant/dashboards/wetter_cape.yaml` und wird über `configuration.yaml` (`lovelace: dashboards:`) automatisch als eigener Menüpunkt "Wetter" in der Seitenleiste eingebunden — kein manuelles Anlegen in der UI nötig. Für den CAPE-Verlaufs-Graph darin wird die HACS-Card `apexcharts-card` benötigt (siehe Punkt e); ohne HACS werden Gauge- und Detail-Card trotzdem angezeigt.
+
 ---
 
 ## Was muss jeder Nutzer anpassen?
@@ -217,7 +222,7 @@ Dieses Projekt lebt von der Community! Beiträge sind ausdrücklich erwünscht �
 - Grafana-Dashboard als Export
 - Unterstützung weiterer HobbyConnect-Geräte/Topics
 - Truma-Heizungssteuerung via MQTT
-- HA Lovelace Dashboard als YAML-Export
+- Weitere HA Lovelace Dashboards als YAML-Export (bisher: Wetter/CAPE-Tab)
 - Mehrsprachige README (EN)
 
 ---
